@@ -29,7 +29,6 @@ app.configure('production', function(){
 
 // Routes
 
-app.get('/', routes.index);
 routes.configure(app);
 
 app.listen(3000);
