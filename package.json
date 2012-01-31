@@ -1,0 +1,20 @@
+{
+    "name": "shortstatus"
+  , "version": "0.0.1"
+  , "description" : "A dashboard for short team statuses."
+  , "author" : "Philip Mateescu"
+  , "license" : "Not yet"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.6"
+    , "jade": ">= 0.0.1"
+    , "underscore" : ">= 1.2.0"
+  }
+  ,"devDependencies" : {
+      "expresso" : "0.7.x"
+    , "autotest" : "*"
+  }
+  , "scripts" : {
+  	  "test" : "expresso"
+  }
+}
