@@ -4,11 +4,11 @@
  */
 var path = require('path');
 var _ = require('underscore');
-var PUB  = path.normalize(__dirname + '/../');
+var PUB  = path.normalize(__dirname + '/../../../');
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
-	console.log('Serving public: %s', pub);
+	console.log('Serving static: %s', pub);
   	res.sendfile(pub);
 }
 
