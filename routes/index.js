@@ -67,12 +67,12 @@ exports.configure = function(app) {
 				});
 		} else {
 			res.json({
-				teams : {
+				teams : [{
    					"_id": "920b80c0e0035948d4ef162f1400353d",
    					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
    					"team_name": "Moof",
    					"team_members": [ "philipmat" ]
-   				}
+   				}]
    			});
 		}
 	});
