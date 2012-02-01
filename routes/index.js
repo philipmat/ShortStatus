@@ -47,7 +47,34 @@ exports.configure = function(app) {
 	});
 
 	app.get('/data/teams/:name?', function(req, res) {
-		console.log('Status for team %s.', req.params.name || 'all');
+		if (req.params.name !== undefined) {
+			res.json(
+				{
+   					"_id": "920b80c0e0035948d4ef162f1400353d",
+   					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
+   					"team_name": "Moof",
+   					"team_members": [ "philipmat" ],
+   					current: [
+   						{
+   							"_id": "920b80c0e0035948d4ef162f14000a98",
+   							"_rev": "3-af2753f95e3347c6d058e220af35f2ec",
+   							"type": "current",
+   							"date": "2011-01-30 23:32:00",
+   							"name": "philipmat",
+   							"description": "Creating couch document"
+						} 
+   					]
+				});
+		} else {
+			res.json({
+				teams : {
+   					"_id": "920b80c0e0035948d4ef162f1400353d",
+   					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
+   					"team_name": "Moof",
+   					"team_members": [ "philipmat" ]
+   				}
+   			});
+		}
 	});
 
 	app.get('/data/status/:name?', function(req, res) {

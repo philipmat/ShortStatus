@@ -1,1 +1,9 @@
-<h1>Teams</h1>
+<h1>Team: <span data-bind="text: teamName"></span></h1>
+<div data-bind="foreach: currentStatuses">
+	<div class="status">
+		<span class="member-name" data-bind="text: name"></span>
+		<span class="member-status" data-bind="text: description"></span>
+		<span class="member-status-since" data-bind="text: since"></span>
+	</div>
+</div>
+

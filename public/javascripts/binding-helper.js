@@ -49,12 +49,12 @@ function getData(parts, callback) {
 		var all_uri = du(parts);
 		// console.log('loading all: %s', all_uri);
 		$.getJSON(all_uri, function(allData) {
-			window[ns].loadViewModel(allData);
-			if (id !== undefined) {
+			window[ns].loadMaster(allData);
+			if (parts.id !== undefined) {
 				var id_uri = du(parts);
 				// console.log('loading single element from: %s', id_uri);
 				$.getJSON(id_uri, function(idData) {
-					window[ns].loadModel(idData);
+					window[ns].loadDetail(idData);
 					ko.applyBindings(window[ns].ViewModel);
 				});
 			} else {
