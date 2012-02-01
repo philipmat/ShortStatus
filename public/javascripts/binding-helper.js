@@ -53,10 +53,14 @@ function getData(parts, callback) {
 			if (parts.id !== undefined) {
 				var id_uri = du(parts);
 				// console.log('loading single element from: %s', id_uri);
-				$.getJSON(id_uri, function(idData) {
-					window[ns].loadDetail(idData);
+				if (id_uri === all_uri) {
 					ko.applyBindings(window[ns].ViewModel);
-				});
+				} else {
+					$.getJSON(id_uri, function(idData) {
+						window[ns].loadDetail(idData);
+						ko.applyBindings(window[ns].ViewModel);
+					});
+				} 
 			} else {
 				ko.applyBindings(window[ns].ViewModel);
 			}
