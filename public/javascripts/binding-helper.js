@@ -44,7 +44,17 @@ function getParts(uri) {
 
 function loadKoTemplate(uri, callback) {
 	$.get(uri, function(data) {
-		$('#content').append(data);
+		var parent = $('<div/>');
+		parent.append(data);
+		parent.children().each(function() {
+			var selector = $(this).attr('append-to');
+			console.log('selector: %s', selector);
+			if (selector !== undefined) {
+				$(selector).append(this);
+			} else {
+				$('body').append(this);
+			}
+		});
 		if (callback) callback(data);
 	});
 }
