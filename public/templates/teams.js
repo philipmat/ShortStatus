@@ -66,11 +66,8 @@ window['teams'] = {
 	load : function (fromJson) {
 		this.ViewModel.loadFrom(fromJson);
 	}, 
-
-	setup : function(parts) {
-		console.log('Teams setup with parts:', parts);
-		loadKoTemplate(getURI('text/vnd.borax-template-root', { 
-			template_uri : parts.entity + '.html'}));
+	
+	loadData : function(parts) {
 		var self = this;
 		var templateVars = {entity:parts.entity, data_uri : ''};
 		if (parts.id !== undefined) {
@@ -82,6 +79,14 @@ window['teams'] = {
 					self.load(data);
 					bind(self.ViewModel);
 				}
-				);
+		);
+	},
+
+	setup : function(parts) {
+		var self = this;
+		console.log('Teams setup with parts:', parts);
+		loadKoTemplate(getURI('text/vnd.borax-template-root', { 
+			template_uri : parts.entity + '.html'}),
+				function() { self.loadData(parts) });
 	}
 }

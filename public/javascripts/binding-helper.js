@@ -50,9 +50,53 @@ function loadKoTemplate(uri, callback) {
 }
 
 function loadJson(uri, callback) {
-	$.getJSON(uri, function(data) {
-		if (callback) callback(data);
-	});
+	var uris = [], callbacks = [], finalC = noop = function() {};
+	if (_.isArray(uri)) {
+		uris = uri;
+		if (_.isArray(callback)) {
+			if (callback.length === uri.length + 1) {
+				callbacks = _.initial(callback);
+				finalC = _.last(callback);
+			} else {
+				var cs = [].slice.apply(callback); 
+				_.times(uris.length, function() {
+					var cx = cs.shift();
+					if (cx === undefined) cx = noop;
+					callbacks.push(cx);
+				});
+			}
+		} else if (_.isFunction(callback)) {
+			// TODO: maybe this should be finalC with noop for callbacks
+			_.times(uris.length, function() {
+				callbacks.push(callback);
+			});
+		} else if (callback.each || callback.finalC) {
+			var each = callback.each || noop;
+			finalC = callback.finalC || noop;
+			_.times(uris.length, function() {
+				callbacks.push(each);
+			});
+		}
+	} else { 
+		uris.push(uri);
+		callbacks.push(callback);
+	}
+	console.log('URIs: %o, callbacks %s', uris, callbacks.length);
+	var semaphore = uris.length, allData = [];
+	for (var i = 0; i < uris.length; i++) {
+		var ux = uris[i], cx = callbacks[i];
+
+	};
+	for (var i = 0; i < uris.length; i += 1) {
+		var ux = uris[i], cx = callbacks[i];
+
+		$.getJSON(ux, function(data) {
+			console.log('for %s got: ', ux, data);
+			if (cx) cx(data);
+			semaphore--; allData.push(data);
+			if (semaphore === 0) finalC(allData);
+		});
+	}
 }
 
 function includeHelper(parts) {
@@ -63,8 +107,7 @@ function includeHelper(parts) {
 					console.log('Loaded %s.', scriptUri, args);
 					window[args.entity].setup(args);
 				};
-			})(parts)
-			);
+			})(parts));
 }
 
 function bind(viewModel) {
@@ -75,7 +118,7 @@ function bind(viewModel) {
 function setup(uri) {
 	_.templateSettings = { 
 		interpolate: /\{(.+?)\}/g
-	}
+	};
 	var parts = getParts(uri);
 	//console.log(parts);
 	includeHelper(parts);
