@@ -85,6 +85,7 @@ window['teams'] = {
 	setup : function(parts) {
 		var self = this;
 		console.log('Teams setup with parts:', parts);
+		loadCss(getURI('text/vnd.borax-template-root', { template_uri : 'team.css'}));
 		loadKoTemplate(getURI('text/vnd.borax-template-root', { 
 			template_uri : parts.entity + '.html'}),
 				function() { self.loadData(parts) });

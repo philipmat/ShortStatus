@@ -42,6 +42,17 @@ function getParts(uri) {
 	return { uri : uri,  entity : ns, id : id, all : parts};
 }
 
+function loadCss(uri, callback) {
+	console.log('Loading css for %s.', uri);
+	$('head').append($('<link/>', {
+		type : 'text/css',
+		rel  : 'stylesheet',
+		href : uri
+		})
+	);
+	if (callback) callback();
+}
+
 function loadKoTemplate(uri, callback) {
 	$.get(uri, function(data) {
 		var parent = $('<div/>');
