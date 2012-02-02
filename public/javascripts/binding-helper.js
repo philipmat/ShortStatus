@@ -49,6 +49,22 @@ function loadKoTemplate(uri, callback) {
 	});
 }
 
+/**
+ * Loads JSON from an URI and passes it to a callback.
+ * Can take in an array of uris, in which case:
+ * - if callback is an array of length uri.length + 1, calls 
+ *   each corresponding callback for each uri, then the extra one
+ *   at the end of all uris, passing in the collected JSONs
+ *   as an array
+ * - if callback is an array of same lenght or less,
+ *   it calls each correspoinding callback, supplementing missing 
+ *   ones with a noop.
+ * - if callback is a function, it calls that function for each of the uris
+ * - if callback is an object with a property called 'each', it calls that each 
+ *   function for each uri; if the callback has a property called 'final',
+ *   it called that function at the end of the run, passing in the 
+ *   collected JSONs
+ */
 function loadJson(uri, callback) {
 	var uris = [], callbacks = [], finalC = noop = function() {};
 	if (_.isArray(uri)) {
