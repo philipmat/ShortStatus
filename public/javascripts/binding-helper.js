@@ -1,3 +1,22 @@
+function loadScript(url, onLoad) {
+    var s = document.createElement('script'),
+        onEvent = ('onreadystatechange' in s) ? 'onreadystatechange' : 'onload';
+
+    s[onEvent] = function () {
+        if (("loaded,complete").indexOf(this.readyState || "loaded") > -1) {
+            s[onEvent] = null;
+
+            // Call your code here
+            onLoad(url);
+        }
+    };
+
+    s.type = 'text/javascript';
+    s.src = url;
+
+    document.getElementsByTagName('head')[0].appendChild(s);
+}
+
 function getQS(uri) {
 	return uri.substr(1);
 }
@@ -14,59 +33,43 @@ function getURI(type, parts) {
 	console.debug('getURI -> url=%s', url);
 	return url;
 }
-function du(parts) { return getURI('text/vnd.knockout-data', parts); }
-function tu(parts) { return getURI('text/vnd.knockout-template', parts); }
-function vmu(parts) { return getURI('text/vnd.knockout-viewmodel', parts); }
-
 
 function getParts(uri) {
 	var parts = getQS(uri).split('/');
 	parts = _(parts).filter(function (it) { return it !== ''; });
 	var ns = _.first(parts),
 		id = _.first(_.rest(parts));
-	return { entity : ns, id : id };
+	return { uri : uri,  entity : ns, id : id, all : parts};
+}
+
+function loadKoTemplate(uri, callback) {
+	$.get(uri, function(data) {
+		$('#content').append(data);
+		if (callback) callback(data);
+	});
+}
+
+function loadJson(uri, callback) {
+	$.getJSON(uri, function(data) {
+		if (callback) callback(data);
+	});
 }
 
 function includeHelper(parts) {
-	$('head').append( $('<script/>', {
-		src : vmu(parts),
-	type : 'text/javascript'}));
+	var uri = getURI('text/vnd.borax-helper', parts),
+		ns = parts.ns;
+	loadScript(uri, (function(args) {
+				return function(scriptUri) {
+					console.log('Loaded %s.', scriptUri, args);
+					window[args.entity].setup(args);
+				};
+			})(parts)
+			);
 }
 
-function getKOTemplates(parts, callback) {
-	if (parts.entity !== undefined) {
-		var url = tu(parts);
-		$.get(url, function(data) {
-			$('#content').append(data);
-			callback();
-		});
-	}
-}
-
-function getData(parts, callback) {
-	if (parts.entity !== undefined) {
-		var ns = parts.entity;
-		var all_uri = du(parts);
-		// console.log('loading all: %s', all_uri);
-		$.getJSON(all_uri, function(allData) {
-			window[ns].loadMaster(allData);
-			if (parts.id !== undefined) {
-				var id_uri = du(parts);
-				// console.log('loading single element from: %s', id_uri);
-				if (id_uri === all_uri) {
-					ko.applyBindings(window[ns].ViewModel);
-				} else {
-					$.getJSON(id_uri, function(idData) {
-						window[ns].loadDetail(idData);
-						ko.applyBindings(window[ns].ViewModel);
-					});
-				} 
-			} else {
-				ko.applyBindings(window[ns].ViewModel);
-			}
-
-		});
-	}
+function bind(viewModel) {
+	console.debug('Binding view model: ', viewModel);
+	ko.applyBindings(viewModel);
 }
 
 function setup(uri) {
@@ -76,11 +79,5 @@ function setup(uri) {
 	var parts = getParts(uri);
 	//console.log(parts);
 	includeHelper(parts);
-	// if using individual chunks:
-	//getTemplates(ns, function() {
-	// if using KO templates
-	getKOTemplates(parts, function() {
-		getData(parts);
-	});
 }
 
