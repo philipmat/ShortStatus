@@ -156,6 +156,11 @@ function setup(uri) {
 	_.templateSettings = { 
 		interpolate: /\{(.+?)\}/g
 	};
+	ko.observableArray.fn.last = function () {
+		console.log("last args:", arguments);
+		var matchValue = arguments[0];
+		return this().indexOf(matchValue) === this().length - 1;
+	};
 	var parts = getParts(uri);
 	//console.log(parts);
 	includeHelper(parts);
