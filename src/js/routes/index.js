@@ -55,15 +55,15 @@ exports.configure = function(app) {
    					"team_name": "Moof",
    					"team_members": [ "philipmat" ],
    					current: [
-   						{
-   							"_id": "920b80c0e0035948d4ef162f14000a98",
-   							"_rev": "3-af2753f95e3347c6d058e220af35f2ec",
+						{
+   							"_id": "920b80c0e0035948d4ef162f14001894",
+   							"_rev": "2-d976327c40abbdd82de4361aa7136fc6",
    							"type": "current",
-   							"date": "2011-01-30 23:32:00",
+   							"date": "2010-02-06 00:29:00",
    							"name": "philipmat",
-   							"description": "Creating couch document"
-						} 
-   					]
+   							"description": "Creating previous and next statuses"
+						}
+					]
 				});
 		} else {
 			res.json({
@@ -77,7 +77,50 @@ exports.configure = function(app) {
 		}
 	});
 
-	app.get('/data/status/:name?', function(req, res) {
+
+	app.get('/data/status/:name/current', function(req, res, next) {
+		console.log('current status for: %s.', req.params.name);
+		res.json (
+			{
+   				"_id": "920b80c0e0035948d4ef162f14001894",
+   				"_rev": "2-d976327c40abbdd82de4361aa7136fc6",
+   				"type": "current",
+   				"date": "2012-02-06 00:29:00",
+   				"name": "philipmat",
+   				"description": "Creating previous and next statuses"
+			}
+			);
+	});
+
+	app.get('/data/status/:name/next', function(req, res, next) {
+		console.log('next status for: %s.', req.params.name);
+		res.json(
+			{
+   				"_id": "920b80c0e0035948d4ef162f14001fad",
+   				"_rev": "4-4ce59e5826cc626ac227c06d84c248aa",
+   				"type": "next",
+   				"date": "",
+   				"name": "philipmat",
+   				"description": "Creating view for current, next, and previous statuses"
+			}
+			);
+	});
+
+	app.get('/data/status/:name/prev', function(req, res, next) {
+		console.log('previous statuses for: %s.', req.params.name);
+		res.json(
+			{
+   				"_id": "920b80c0e0035948d4ef162f14000a98",
+   				"_rev": "5-9851eea57f2ac2816b1b78507a348322",
+   				"type": "previous",
+   				"date": "2011-01-30 23:32:00",
+   				"name": "philipmat",
+   				"description": "Creating couch document"
+			}
+			);
+	});
+
+	app.get('/data/status/:name?', function(req, res, next) {
 		console.log('Status for %s.', req.params.name || 'all');
 	});
 }

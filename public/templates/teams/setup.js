@@ -1,4 +1,4 @@
-window['teams'] = {
+var teams = {
 	ViewModel : {
 		// master
 		teams : ko.observableArray([]),
@@ -46,11 +46,11 @@ window['teams'] = {
 							if ( tStruct.days > 3) {
 								ssince += tStruct.days + " days.";
 							} else if ( tStruct.days > 0) {
-								ssince += tStruct.days + " days and " + tStruct.hours + " hours.";
+								ssince += tStruct.days + " days and " + (tStruct.hours % 24) + " hours.";
 							} else if (tStruct.hours > 2) {
 								ssince += tStruct.hours + " hours.";
 							} else if (tStruct.hours > 0 ) {
-								ssince += tStruct.hours + " hours and " + tStruct.minutes + " minutes.";
+								ssince += tStruct.hours + " hours and " + (tStruct.minutes % 60) + " minutes.";
 							} else return "Under an hour.";
 							return ssince;
 						}, this);
@@ -63,9 +63,7 @@ window['teams'] = {
 		makeTeamMember : function(fromJson) {
 			var m = {};
 			if (_.isString(fromJson)) {
-				console.log('makeTeamMember.this1:', this);
 				m = new (function (j) {
-					console.log('makeTeamMember.this2:', this);
 					this.name = j;
 					this.prepUrl = '/status/' + j;
 					return this;
@@ -124,3 +122,5 @@ window['teams'] = {
 				function() { self.loadData(parts) });
 	}
 }
+
+attachToWindow('teams', teams);

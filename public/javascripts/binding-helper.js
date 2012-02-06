@@ -1,3 +1,12 @@
+function attachToWindow(namespace, objectForNamespace) {
+	if (window.shortstatus === undefined) {
+		window.shortstatus = {};
+		window.shortstatus[namespace] = objectForNamespace;
+	} else if (window.shortstatus[namespace] === undefined) {
+		window.shortstatus[namespace] = objectForNamespace;
+	}
+}
+
 function loadScript(url, onLoad) {
     var s = document.createElement('script'),
         onEvent = ('onreadystatechange' in s) ? 'onreadystatechange' : 'onload';
@@ -107,9 +116,9 @@ function loadJson(uri, callback) {
 			_.times(uris.length, function() {
 				callbacks.push(callback);
 			});
-		} else if (callback.each || callback.finalC) {
+		} else if (callback.each || callback.final) {
 			var each = callback.each || noop;
-			finalC = callback.finalC || noop;
+			finalC = callback.final || noop;
 			_.times(uris.length, function() {
 				callbacks.push(each);
 			});
@@ -142,7 +151,7 @@ function includeHelper(parts) {
 	loadScript(uri, (function(args) {
 				return function(scriptUri) {
 					console.log('Loaded %s.', scriptUri, args);
-					window[args.entity].setup(args);
+					window.shortstatus[args.entity].setup(args);
 				};
 			})(parts));
 }

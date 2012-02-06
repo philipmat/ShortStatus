@@ -17,10 +17,10 @@
 	<h1><a href=".">Team</a>: <span data-bind="text: teamName"></span></h1>
 	<div data-bind="foreach: currentStatuses">
 		<p class="status">
-			<span class="member-name" data-bind="text: name"></span>
+			<a class="member-name" data-bind="text: name, attr : { href: prepUrl }"></a>
 			<span class="member-status callout border-callout">
 				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since"></span>)</span>
+				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>)</span>
 			</span>
 		</p>
 	</div>
