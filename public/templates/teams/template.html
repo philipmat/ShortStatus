@@ -1,0 +1,31 @@
+<script type="text/html" id="teams-template" append-to='head'>
+	<!-- ko if: length -->
+	<h1>Teams</h1>
+	<ul data-bind="foreach: $data" class="team-list">
+		<li>
+			<a data-bind="attr: { href: prepUrl }, text: teamName"></a>: 
+			<ul data-bind="foreach: teamMembers" class="team-member-list">
+				<li><a data-bind="attr : { href: $data.prepUrl }, text : name"></a><span data-bind="ifnot: $parent.teamMembers.last($data)">, </span></li>
+			</ul>
+			</li>
+	</ul>	
+	<!-- /ko -->
+</script>
+
+<script type="text/html" id="team-template" append-to='head'>
+	<!-- ko if: id -->
+	<h1><a href=".">Team</a>: <span data-bind="text: teamName"></span></h1>
+	<div data-bind="foreach: currentStatuses">
+		<p class="status">
+			<span class="member-name" data-bind="text: name"></span>
+			<span class="member-status callout border-callout">
+				<span class="member-status-text" data-bind="text: description"></span>
+				<span class="member-status-since">(For <span data-bind="text: since"></span>)</span>
+			</span>
+		</p>
+	</div>
+	<!-- /ko -->
+</script>
+
+<div data-bind="template: { name: 'teams-template', data: teams }" append-to='#content'></div>
+<div data-bind="template: { name: 'team-template', data : team }" append-to='#content'></div>
