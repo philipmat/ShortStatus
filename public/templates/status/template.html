@@ -6,10 +6,29 @@
 			Currently: 
 			<span class="member-status callout border-callout">
 				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>)</span>
+				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>.)</span>
 			</span>
 		</p>
 	</div>
+	<div id="#details">
+		<div id="#next-statuses">
+			<h2>Next on the list</h2>
+			<div data-bind="foreach: nextStatuses">
+				<span class="member-status callout border-callout">
+					<span class="member-status-text" data-bind="text: description"></span>
+				</span>
+			</div>
+			<h2>Previously worked on</h2>
+			<div data-bind="foreach: previousStatuses">
+				<span class="member-status callout border-callout">
+					<span class="member-status-text" data-bind="text: description"></span>
+					<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span> 
+						starting on 
+						<span data-bind="text: shortDate, attr : { title : date }"></span>)</span>
+				</span>
+			</div>
+		</div>
+	</div> <!-- #details -->
 	<!-- /nko -->
 </script>
 

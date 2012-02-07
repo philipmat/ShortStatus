@@ -11,10 +11,12 @@ var userStatus = {
 						var self = this;
 						this.id = j._id;
 						this.date = j.date;
-						this.description = j.description,
-						this.type = j.type,
+						this.done_on = j.done_on;
+						this.description = j.description;
+						this.type = j.type;
 						this.since = ko.computed(function() {
-							var utime = Date.now() - Date.parse(this.date);
+							var dtime = this.done_on ? Date.parse(this.done_on) : Date.now();
+							var utime = dtime - Date.parse(this.date);
 							var minutes = 60 * 1000;
 							var tStruct = {
 								minutes : parseInt(utime / minutes),
@@ -23,15 +25,18 @@ var userStatus = {
 							};	
 							var ssince = "about ";
 							if ( tStruct.days > 3) {
-								ssince += tStruct.days + " days.";
+								ssince += tStruct.days + " days";
 							} else if ( tStruct.days > 0) {
-								ssince += tStruct.days + " days and " + (tStruct.hours % 24) + " hours.";
+								ssince += tStruct.days + " days and " + (tStruct.hours % 24) + " hours";
 							} else if (tStruct.hours > 2) {
-								ssince += tStruct.hours + " hours.";
+								ssince += tStruct.hours + " hours";
 							} else if (tStruct.hours > 0 ) {
-								ssince += tStruct.hours + " hours and " + (tStruct.minutes % 60) + " minutes.";
-							} else return "Under an hour.";
+								ssince += tStruct.hours + " hours and " + (tStruct.minutes % 60) + " minutes";
+							} else return "Under an hour";
 							return ssince;
+						}, this);
+						this.shortDate = ko.computed(function() {
+							return (new Date(Date.parse(this.date))).toDateString();
 						}, this);
 						this.prepUrl = '/status/' + this.name;
 						return this;
@@ -46,7 +51,7 @@ var userStatus = {
 			switch (x.type) {
 				case "current": this.currentStatus(x); break;
 				case "next": this.nextStatuses.push(x); break;
-				case "previous": this.previousStatuses.push(x);
+				case "previous": this.previousStatuses.push(x); break;
 				default: 
 					console.log("Don't know how to handle type: %s on", x.type, fromJson);
 					break;
@@ -65,9 +70,11 @@ var userStatus = {
 
 	loadData : function(parts) {
 		var self = this;
-		var templateVars = {entity:parts.entity, data_uri : parts.id + '/current' };
+		var uris = _(['current', 'next', 'prev']).map(function(x) {
+			return getURI('text/vnd.borax-data-root', { entity:parts.entity, data_uri : parts.id + '/' + x });
+		});
 		loadJson(
-				[getURI('text/vnd.borax-data-root', templateVars)],
+				uris,
 				{ 
 					each : function(data) { self.load(data); },
 					final : function(data) { self.loadDone(data); }

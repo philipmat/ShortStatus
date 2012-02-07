@@ -113,7 +113,8 @@ exports.configure = function(app) {
    				"_id": "920b80c0e0035948d4ef162f14000a98",
    				"_rev": "5-9851eea57f2ac2816b1b78507a348322",
    				"type": "previous",
-   				"date": "2011-01-30 23:32:00",
+   				"date": "2012-01-30 23:32:00",
+   				"done_on": "2012-01-31 03:15:00",
    				"name": "philipmat",
    				"description": "Creating couch document"
 			}
