@@ -4,9 +4,15 @@
 	<div data-bind="with: currentStatus">
 		<p class="status">
 			Currently: 
-			<span class="member-status callout border-callout">
+			<span class="member-status callout border-callout" data-bind="visible: !$root.newMode()">
 				<span class="member-status-text" data-bind="text: description"></span>
 				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>.)</span>
+				<a href="#" data-bind="click: $root.create">New</a>
+			</span>
+			<span data-bind="visible: $root.newMode">
+				<textarea data-bind="text: description"></textarea>
+				<button data-bind="click: $root.save">Post</button>
+				<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
 			</span>
 		</p>
 	</div>
@@ -16,6 +22,7 @@
 			<div data-bind="foreach: nextStatuses">
 				<span class="member-status callout border-callout">
 					<span class="member-status-text" data-bind="text: description"></span>
+					<a href="#" data-bind="click : $root.makeCurrent">Work on this</a>
 				</span>
 			</div>
 			<h2>Previously worked on</h2>

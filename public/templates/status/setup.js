@@ -1,7 +1,10 @@
+(function(root) {
 var userStatus = {
 	ViewModel : {
+		newMode : ko.observable(false),
 		name : ko.observable(),
 		currentStatus : ko.observable(),
+		currentStatusBak : ko.observable(),
 		team : ko.observable(),
 		nextStatuses : ko.observableArray([]),
 		previousStatuses : ko.observableArray([]),
@@ -9,12 +12,13 @@ var userStatus = {
 		makeStatus : function(fromJson) {
 			var d = new (function (j) {
 						var self = this;
-						this.id = j._id;
-						this.date = j.date;
-						this.done_on = j.done_on;
-						this.description = j.description;
-						this.type = j.type;
-						this.since = ko.computed(function() {
+						self.id = j._id;
+						self.name = j.name;
+						self.date = j.date;
+						self.done_on = j.done_on;
+						self.description = j.description;
+						self.type = j.type;
+						self.since = ko.computed(function() {
 							var dtime = this.done_on ? Date.parse(this.done_on) : Date.now();
 							var utime = dtime - Date.parse(this.date);
 							var minutes = 60 * 1000;
@@ -34,26 +38,56 @@ var userStatus = {
 								ssince += tStruct.hours + " hours and " + (tStruct.minutes % 60) + " minutes";
 							} else return "Under an hour";
 							return ssince;
-						}, this);
-						this.shortDate = ko.computed(function() {
+						}, self);
+						self.shortDate = ko.computed(function() {
 							return (new Date(Date.parse(this.date))).toDateString();
-						}, this);
-						this.prepUrl = '/status/' + this.name;
-						return this;
+						}, self);
+						self.prepUrl = '/status/' + self.name;
+						return self;
 					})(fromJson);
 			return d;
 		}, 
+
+		makeCurrent : function(status) {
+			console.log(ko.toJSON(status));
+		},
+		
+		edit : function() {
+			userStatus.ViewModel.newMode(true);
+		},
+
+		create : function() {
+			var vm = userStatus.ViewModel;
+			var name = vm.name();
+			vm.currentStatus(vm.makeStatus({name:name}));
+			vm.newMode(true);
+		},
+
+		save : function() {
+			console.log(this);
+			console.log(ko.toJSON(this));
+		},
+
+		cancelEdit : function() {
+			var vm = userStatus.ViewModel;
+			vm.currentStatus(vm.currentStatusBak());
+			vm.newMode(false);
+		},
+
 
 		loadFrom : function (fromJson) {
 			var self = this;
 			this.name(fromJson.name);
 			var x = this.makeStatus(fromJson);
 			switch (x.type) {
-				case "current": this.currentStatus(x); break;
+				case "current": 
+					this.currentStatus(x); 
+					this.currentStatusBak(x); 
+					break;
 				case "next": this.nextStatuses.push(x); break;
 				case "previous": this.previousStatuses.push(x); break;
 				default: 
-					console.log("Don't know how to handle type: %s on", x.type, fromJson);
+					console.error("Don't know how to handle type: %s on", x.type, fromJson);
 					break;
 
 			}
@@ -93,3 +127,4 @@ var userStatus = {
 }
 
 attachToWindow('status', userStatus);
+})(window);

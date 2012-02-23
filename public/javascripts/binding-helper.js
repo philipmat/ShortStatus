@@ -39,7 +39,7 @@ function getURI(type, parts) {
 	}
 	var compiled = _.template(hrefTemplate);
 	var url = compiled(parts);
-	console.debug('getURI -> url=%s', url);
+	//console.debug('getURI -> url=%s', url);
 	return url;
 }
 
@@ -52,7 +52,7 @@ function getParts(uri) {
 }
 
 function loadCss(uri, callback) {
-	console.log('Loading css for %s.', uri);
+	//console.log('Loading css for %s.', uri);
 	$('head').append($('<link/>', {
 		type : 'text/css',
 		rel  : 'stylesheet',
@@ -68,7 +68,7 @@ function loadKoTemplate(uri, callback) {
 		parent.append(data);
 		parent.children().each(function() {
 			var selector = $(this).attr('append-to');
-			console.log('selector: %s', selector);
+			//console.log('selector: %s', selector);
 			if (selector !== undefined) {
 				$(selector).append(this);
 			} else {
@@ -127,7 +127,7 @@ function loadJson(uri, callback) {
 		uris.push(uri);
 		callbacks.push(callback);
 	}
-	console.log('URIs: %o, callbacks %s', uris, callbacks.length);
+	//console.log('URIs: %o, callbacks %s', uris, callbacks.length);
 	var semaphore = uris.length, allData = [];
 	for (var i = 0; i < uris.length; i++) {
 		var ux = uris[i], cx = callbacks[i];
@@ -137,7 +137,7 @@ function loadJson(uri, callback) {
 		var ux = uris[i], cx = callbacks[i];
 
 		$.getJSON(ux, function(data) {
-			console.log('for %s got: ', ux, data);
+			//console.log('for %s got: ', ux, data);
 			if (cx) cx(data);
 			semaphore--; allData.push(data);
 			if (semaphore === 0) finalC(allData);
@@ -150,7 +150,7 @@ function includeHelper(parts) {
 		ns = parts.ns;
 	loadScript(uri, (function(args) {
 				return function(scriptUri) {
-					console.log('Loaded %s.', scriptUri, args);
+					//console.log('Loaded %s.', scriptUri, args);
 					window.shortstatus[args.entity].setup(args);
 				};
 			})(parts));
@@ -166,7 +166,7 @@ function setup(uri) {
 		interpolate: /\{(.+?)\}/g
 	};
 	ko.observableArray.fn.last = function () {
-		console.log("last args:", arguments);
+		//console.log("last args:", arguments);
 		var matchValue = arguments[0];
 		return this().indexOf(matchValue) === this().length - 1;
 	};

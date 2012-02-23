@@ -91,6 +91,7 @@ exports.configure = function(app) {
 			}
 			);
 	});
+	app.post('/data/status/:name/current', function(req, res, next) {}); // marks a new status as current for this user
 
 	app.get('/data/status/:name/next', function(req, res, next) {
 		console.log('next status for: %s.', req.params.name);
@@ -105,6 +106,8 @@ exports.configure = function(app) {
 			}
 			);
 	});
+	app.post('/data/status/:name/next', function(req, res, next) {}); // adds a new status to the next list
+	app.put('/data/status/:name/next/:id', function(req, res, next) {}); // updates a next status
 
 	app.get('/data/status/:name/prev', function(req, res, next) {
 		console.log('previous statuses for: %s.', req.params.name);
