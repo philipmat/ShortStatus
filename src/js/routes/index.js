@@ -3,8 +3,10 @@
  * GET home page.
  */
 var path = require('path');
+var nano = require('nano')('http://localhost:5984/shortstat');
 var _ = require('underscore');
 var PUB  = path.normalize(__dirname + '/../../../');
+var VIEW = 'shortstatus';
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
@@ -80,7 +82,11 @@ exports.configure = function(app) {
 
 	app.get('/data/status/:name/current', function(req, res, next) {
 		console.log('current status for: %s.', req.params.name);
-		res.json (
+		var stat = nano.view(VIEW, 'current_statuses', {keys:[req.params.name]}, function(x,data) {
+			console.log("DATA!!!!!!!:", data.rows[0].value);
+			res.json(data.rows[0].value);
+		});
+		/*res.json (
 			{
    				"_id": "920b80c0e0035948d4ef162f14001894",
    				"_rev": "2-d976327c40abbdd82de4361aa7136fc6",
@@ -90,6 +96,7 @@ exports.configure = function(app) {
    				"description": "Creating previous and next statuses"
 			}
 			);
+		//*/
 	});
 	app.post('/data/status/:name/current', function(req, res, next) {}); // marks a new status as current for this user
 
