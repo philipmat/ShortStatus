@@ -6,7 +6,9 @@ var path = require('path');
 var nano = require('nano')('http://localhost:5984/shortstat');
 var _ = require('underscore');
 var PUB  = path.normalize(__dirname + '/../../../');
-var VIEW = 'shortstatus';
+var VIEW_NS = 'shortstatus';
+var VIEW_TEAM = 'teams_and_members';
+var VIEW_CUR = 'current_statuses';
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
@@ -50,7 +52,24 @@ exports.configure = function(app) {
 
 	app.get('/data/teams/:name?', function(req, res) {
 		if (req.params.name !== undefined) {
-			res.json(
+			nano.view(VIEW_NS, VIEW_TEAM, {keys:[req.params.name]}, function(x,data) {
+				var t = data.rows[0];
+				var team = { 
+					_id : t.id, 
+					team_members : t.value,
+					team_name: t.key,
+					current : []
+				}
+
+				nano.view(VIEW_NS, VIEW_CUR, { keys: team.team_members }, function(x, data) {
+					data.rows.forEach(function(row) {
+						team.current.push(row.value);
+					});
+
+					res.json(team);
+				});
+			});
+			/*res.json(
 				{
    					"_id": "920b80c0e0035948d4ef162f1400353d",
    					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
@@ -66,24 +85,27 @@ exports.configure = function(app) {
    							"description": "Creating previous and next statuses"
 						}
 					]
-				});
+				});*/
 		} else {
-			res.json({
+			nano.view(VIEW_NS, VIEW_TEAM, {include_docs:true}, function(x,data) {
+				res.json(_(data.rows).map(function(v) {
+					return v.doc; }));
+			});
+			/*res.json({
 				teams : [{
    					"_id": "920b80c0e0035948d4ef162f1400353d",
    					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
    					"team_name": "Moof",
    					"team_members": [ "philipmat" ]
    				}]
-   			});
+               });*/
 		}
 	});
 
 
 	app.get('/data/status/:name/current', function(req, res, next) {
 		console.log('current status for: %s.', req.params.name);
-		var stat = nano.view(VIEW, 'current_statuses', {keys:[req.params.name]}, function(x,data) {
-			console.log("DATA!!!!!!!:", data.rows[0].value);
+		var stat = nano.view(VIEW_NS, VIEW_CUR, {keys:[req.params.name]}, function(x,data) {
 			res.json(data.rows[0].value);
 		});
 		/*res.json (

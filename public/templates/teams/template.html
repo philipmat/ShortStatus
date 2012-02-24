@@ -17,13 +17,17 @@
 	<h1><a href=".">Team</a>: <span data-bind="text: teamName"></span></h1>
 	<div data-bind="foreach: currentStatuses">
 		<p class="status">
-			<a class="member-name" data-bind="text: name, attr : { href: prepUrl }"></a>
-			<span class="member-status callout border-callout">
+			<a class="member-name" data-bind="text: member, attr : { href: prepUrl }"></a>
+			<!-- ko if: status -->
+			<span class="member-status callout border-callout" data-bind="with: status">
 				<span class="member-status-text" data-bind="text: description"></span>
 				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>)</span>
 			</span>
+			<!-- /ko -->
+			<span data-bind="ifnot: status">No status available.</span>
 		</p>
 	</div>
+	<!-- /ko -->
 	<!-- /ko -->
 </script>
 
