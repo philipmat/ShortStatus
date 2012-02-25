@@ -10,7 +10,7 @@
 			</span>
 		</p>
 		<span data-bind="visible: $root.newMode">
-			<textarea data-bind="text: description"></textarea>
+			<textarea data-bind="value: description"></textarea>
 			<button data-bind="click: $root.save">Post</button>
 			<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
 		</span>

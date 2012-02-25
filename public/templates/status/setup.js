@@ -1,15 +1,15 @@
 (function(root) {
 var userStatus = {
-	ViewModel : {
-		newMode : ko.observable(false),
-		name : ko.observable(),
-		currentStatus : ko.observable(),
-		currentStatusBak : ko.observable(),
-		team : ko.observable(),
-		nextStatuses : ko.observableArray([]),
-		previousStatuses : ko.observableArray([]),
+	ViewModel: {
+		newMode: ko.observable(false),
+		name: ko.observable(),
+		currentStatus: ko.observable(),
+		currentStatusBak: ko.observable(),
+		team: ko.observable(),
+		nextStatuses: ko.observableArray([]),
+		previousStatuses: ko.observableArray([]),
 
-		makeStatus : function(fromJson) {
+		makeStatus: function(fromJson) {
 			var d = new (function (j) {
 						var self = this;
 						self.id = j._id;
@@ -19,13 +19,13 @@ var userStatus = {
 						self.done_on = j.done_on;
 						self.description = j.description;
 						self.since = ko.computed(function() {
-							var dtime = this.done_on ? Date.parse(this.done_on) : Date.now();
+							var dtime = this.done_on ? Date.parse(this.done_on): Date.now();
 							var utime = dtime - Date.parse(this.started_on);
 							var minutes = 60 * 1000;
 							var tStruct = {
-								minutes : parseInt(utime / minutes),
-								hours : parseInt(utime / (60 * minutes)),
-								days : parseInt(utime / (24 * 60 * minutes))
+								minutes: parseInt(utime / minutes),
+								hours: parseInt(utime / (60 * minutes)),
+								days: parseInt(utime / (24 * 60 * minutes))
 							};	
 							var ssince = "about ";
 							if ( tStruct.days > 3) {
@@ -53,36 +53,52 @@ var userStatus = {
 			return d;
 		}, 
 
-		makeCurrent : function(status) {
+		makeCurrent: function(status) {
 			console.log(ko.toJSON(status));
 		},
 		
-		edit : function() {
+		edit: function() {
 			userStatus.ViewModel.newMode(true);
 		},
 
-		create : function() {
+		create: function() {
 			var vm = userStatus.ViewModel;
 			var name = vm.name();
 			vm.currentStatus(vm.makeStatus({name:name}));
 			vm.newMode(true);
 		},
 
-		save : function() {
-			console.log(this);
-			console.log(ko.toJSON(this));
+		save: function() {
+			// this is a KO object
+			var post = {}, newObject = false;
+			if (this.id) {
+				post.id = this.id; // update
+				newObject = false;
+			} else {
+				newObject = true;
+				// new 
+				post.created_on = post.started_on = Date.now();
+			}
+
+			post.started_on = this.started_on || Date.now();
+			post.description = this.description;
+			post.name = this.name;
+			
+			//console.log(this);
+			//console.log(post);
+			userStatus.update(post);
 		},
 
-		cancelEdit : function() {
+		cancelEdit: function() {
 			var vm = userStatus.ViewModel;
 			vm.currentStatus(vm.currentStatusBak());
 			vm.newMode(false);
 		},
 
 
-		loadFrom : function (fromJson) {
+		loadFrom: function (fromJson) {
 			var self = this;
-			var data = _.isArray(fromJson.list) ? fromJson.list : [fromJson.list];
+			var data = _.isArray(fromJson.list) ? fromJson.list: [fromJson.list];
 			this.name(fromJson.name);
 			data.forEach(function (status) {
 				var x = self.makeStatus(status);
@@ -103,34 +119,55 @@ var userStatus = {
 		},
 	},
 
-	load : function (fromJson) {
+	load: function (fromJson) {
 		this.ViewModel.loadFrom(fromJson);
 	}, 
 
-	loadDone : function (fromAllJson) {
+	loadDone: function (fromAllJson) {
 		bind(this.ViewModel);
 	},
 
-	loadData : function(parts) {
+	update: function(status) {
+		console.log('update with status:', status);
+		var uri = getURI('text/vnd.borax-data-root', { 
+			entity: userStatus.entity, 
+			data_uri: status.name + (status.id ? '/' + status.id : '') });
+		$.ajax({
+			url: uri,
+			type: 'POST', 
+			contentType:'application/json',
+			data: JSON.stringify(status),
+			success: function(data) {
+				userStatus.load(data);	
+			},
+			error: function(error) {
+				console.log('error: ', error);
+			}
+		});
+	},
+
+
+	loadData: function(parts) {
 		var self = this;
 		var uris = _(['current', 'next', 'done']).map(function(x) {
-			return getURI('text/vnd.borax-data-root', { entity:parts.entity, data_uri : parts.id + '/' + x });
+			return getURI('text/vnd.borax-data-root', { entity:parts.entity, data_uri: parts.id + '/' + x });
 		});
 		loadJson(
 				uris,
 				{ 
-					each : function(data) { self.load(data); },
-					final : function(data) { self.loadDone(data); }
+					each: function(data) { self.load(data); },
+					final: function(data) { self.loadDone(data); }
 				}
 		);
 	},
 
-	setup : function(parts) {
+	setup: function(parts) {
 		var self = this;
+		self.entity = parts.entity;
 		console.log('Teams setup with parts:', parts);
-		loadCss(getURI('text/vnd.borax-template-root', { template_uri : parts.entity + '/template.css'}));
+		loadCss(getURI('text/vnd.borax-template-root', { template_uri: parts.entity + '/template.css'}));
 		loadKoTemplate(getURI('text/vnd.borax-template-root', { 
-			template_uri : parts.entity + '/template.html'}),
+			template_uri: parts.entity + '/template.html'}),
 				function() { self.loadData(parts) });
 	}
 }

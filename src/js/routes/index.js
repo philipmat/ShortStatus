@@ -56,10 +56,10 @@ exports.configure = function(app) {
 			db.view(VIEW_NS, VIEW_TEAM, {keys:[req.params.name]}, function(x,data) {
 				var t = data.rows[0];
 				var team = { 
-					_id : t.id, 
-					team_members : t.value,
+					_id: t.id, 
+					team_members: t.value,
 					team_name: t.key,
-					current : []
+					current: []
 				}
 
 				async.forEach(team.team_members, 
@@ -88,7 +88,7 @@ exports.configure = function(app) {
 		}
 	});
 
-	function show_status(name, status, callback) {
+	function get_status(name, status, callback) {
 		console.log('%s status for: %s.', status, name);
 		var stat = db.view(VIEW_NS, VIEW_STAT, {key:[status, name]}, function(x,data) {
 			callback(_(data.rows).map(function(r) {
@@ -97,16 +97,89 @@ exports.configure = function(app) {
 		});
 	}
 
+	function update_status(status, callback) {
+		db.insert(status, function(e,b,h) {
+			console.log('update.ERROR:', e);
+			console.log('update.BODY:', b);
+			if (e) { 
+				callback(e, null);
+			} else {
+				callback(null, b.id);
+			}
+		});
+	}
+
 	app.get('/data/status/:name/:status', function(req, res, next) {
 		var name = req.params.name
 			, status = req.params.status;
-		show_status(name, status, function(rows) {
+		get_status(name, status, function(rows) {
 			res.json({name:name, status:status, list:rows});
 		});
 	});
 
-	app.post('/data/status/:name', function(req, res, next) {}); // adds a new status to the next list
-	app.put('/data/status/:name', function(req, res, next) {}); // updates a next status
+	app.post('/data/status/:name/:id?', function(req, res, next) {
+		var name = req.params.name, id = req.params.id;
+		var started_on = req.body.started_on;
+		if (id !== undefined) {
+			// updating an existing status
+			console.log('updating existing document: %s', id);
+			if (started_on !== undefined) {
+				// another status was made current
+				// or an existing current status was updated
+				console.log('update or activate');
+			} else {
+				// a new status was added
+				console.log('update next document');
+			}
+		} else {
+			// a new status was created
+			if (started_on !== undefined) {
+				console.log('new current');
+				// a new current status was created:
+				// 1. obsolete the old one
+				// 2. make the new one active
+				get_status(name, 'current', function(status_rows) {
+					var previous = null;
+					var now = new Date(Date.now()).toISOString();
+					if(!_.isEmpty(status_rows)) {
+						// obsolete status
+						previous = status_rows[0];
+						previous.done_on = now;
+					}
+					var current = {
+						created_on: now,
+						started_on: now,
+						name: name,
+						description: req.body.description
+					}
+
+					var docs = { name: name, list: []};
+					if (previous != null)
+						update_status(previous, function() {});
+					update_status(current, function(err, updatedId) {
+						var ids = [previous._id, updatedId];
+						console.log('getting docs for ids:', ids);
+						async.forEach(ids, function (docId, next) {
+							db.get(docId, function (e,doc) {
+								console.log('for %s got doc:', docId, doc);
+								docs.list.push(doc);
+								next();
+							});
+						}, function (err) {
+							res.json(docs);
+						});
+					});
+				});
+			} else {
+				// a new next status was created
+				console.log('new next');
+			}
+		}
+
+		console.log(req.body);
+	});
+
+	app.put('/data/status/:name', function(req, res, next) {});
 
 
 	app.get('/data/status/:name?', function(req, res, next) {
