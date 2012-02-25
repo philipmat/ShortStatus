@@ -21,7 +21,7 @@
 			<!-- ko if: status -->
 			<span class="member-status callout border-callout" data-bind="with: status">
 				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>)</span>
+				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : started_on}"></span>)</span>
 			</span>
 			<!-- /ko -->
 			<span data-bind="ifnot: status">No status available.</span>

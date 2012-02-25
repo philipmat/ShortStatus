@@ -34,12 +34,13 @@ var teams = {
 						if (j) {
 							this.status = {
 								id: j._id,
-								date: j.date,
+								created_on: j.created_on,
+								started_on: j.started_on,
 								name: j.name,
 								description: j.description
 							};
 							this.status.since = ko.computed(function() {
-								var utime = Date.now() - Date.parse(self.status.date);
+								var utime = Date.now() - Date.parse(self.status.started_on);
 								var minutes = 60 * 1000;
 								var tStruct = {
 									minutes : parseInt(utime / minutes),

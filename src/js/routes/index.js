@@ -3,12 +3,13 @@
  * GET home page.
  */
 var path = require('path');
-var nano = require('nano')('http://localhost:5984/shortstat');
+var db = require('nano')('http://localhost:5984/shortstat');
 var _ = require('underscore');
+var async = require('async');
 var PUB  = path.normalize(__dirname + '/../../../');
 var VIEW_NS = 'shortstatus';
 var VIEW_TEAM = 'teams_and_members';
-var VIEW_CUR = 'current_statuses';
+var VIEW_STAT = 'status_by_member';
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
@@ -52,7 +53,7 @@ exports.configure = function(app) {
 
 	app.get('/data/teams/:name?', function(req, res) {
 		if (req.params.name !== undefined) {
-			nano.view(VIEW_NS, VIEW_TEAM, {keys:[req.params.name]}, function(x,data) {
+			db.view(VIEW_NS, VIEW_TEAM, {keys:[req.params.name]}, function(x,data) {
 				var t = data.rows[0];
 				var team = { 
 					_id : t.id, 
@@ -61,64 +62,38 @@ exports.configure = function(app) {
 					current : []
 				}
 
-				nano.view(VIEW_NS, VIEW_CUR, { keys: team.team_members }, function(x, data) {
-					data.rows.forEach(function(row) {
-						team.current.push(row.value);
-					});
-
-					res.json(team);
-				});
+				async.forEach(team.team_members, 
+					function(t_m, on_done) {
+						db.view(VIEW_NS, VIEW_STAT, { key: ['current', t_m] }, function(x, data) {
+							data.rows.forEach(function(row) {
+								team.current.push(row.value);
+							});
+							on_done();
+						});
+					}
+					, function(err) {
+						if (err) { 
+							console.log('async.forEach(team.team_members) errored out:', err);
+						};
+						console.log(team);
+						res.json(team);
+					}
+				);
 			});
-			/*res.json(
-				{
-   					"_id": "920b80c0e0035948d4ef162f1400353d",
-   					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
-   					"team_name": "Moof",
-   					"team_members": [ "philipmat" ],
-   					current: [
-						{
-   							"_id": "920b80c0e0035948d4ef162f14001894",
-   							"_rev": "2-d976327c40abbdd82de4361aa7136fc6",
-   							"type": "current",
-   							"date": "2010-02-06 00:29:00",
-   							"name": "philipmat",
-   							"description": "Creating previous and next statuses"
-						}
-					]
-				});*/
 		} else {
-			nano.view(VIEW_NS, VIEW_TEAM, {include_docs:true}, function(x,data) {
+			db.view(VIEW_NS, VIEW_TEAM, {include_docs:true}, function(x,data) {
 				res.json(_(data.rows).map(function(v) {
 					return v.doc; }));
 			});
-			/*res.json({
-				teams : [{
-   					"_id": "920b80c0e0035948d4ef162f1400353d",
-   					"_rev": "2-57104cfb47d672cf6e08b1ca774a619c",
-   					"team_name": "Moof",
-   					"team_members": [ "philipmat" ]
-   				}]
-               });*/
 		}
 	});
 
 
 	app.get('/data/status/:name/current', function(req, res, next) {
 		console.log('current status for: %s.', req.params.name);
-		var stat = nano.view(VIEW_NS, VIEW_CUR, {keys:[req.params.name]}, function(x,data) {
+		var stat = db.view(VIEW_NS, VIEW_STAT, {keys:[req.params.name]}, function(x,data) {
 			res.json(data.rows[0].value);
 		});
-		/*res.json (
-			{
-   				"_id": "920b80c0e0035948d4ef162f14001894",
-   				"_rev": "2-d976327c40abbdd82de4361aa7136fc6",
-   				"type": "current",
-   				"date": "2012-02-06 00:29:00",
-   				"name": "philipmat",
-   				"description": "Creating previous and next statuses"
-			}
-			);
-		//*/
 	});
 	app.post('/data/status/:name/current', function(req, res, next) {}); // marks a new status as current for this user
 
