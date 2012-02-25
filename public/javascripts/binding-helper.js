@@ -158,6 +158,7 @@ function includeHelper(parts) {
 
 function bind(viewModel) {
 	console.debug('Binding view model: ', viewModel);
+	window.myViewModel = viewModel;
 	ko.applyBindings(viewModel);
 }
 

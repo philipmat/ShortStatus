@@ -1,19 +1,20 @@
 <html>
 	<head>
-		<script src="/public/javascripts/knockout-2.0.0.debug.js" type="text/javascript"></script>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-		<script src="/public/javascripts/binding-helper.js" type="text/javascript"></script>
-		<script src="/public/javascripts/underscore.js" type="text/javascript"></script>
 		<link rel="uri-template" type="text/vnd.borax-helper" href="/public/templates/{entity}/setup.js"></link>
 		<link rel="uri-template" type="text/vnd.borax-template-root" href="/public/templates/{template_uri}"></link>
 		<link rel="uri-template" type="text/vnd.borax-data-root" href="/data/{entity}/{data_uri}"></link>
-		<script type="text/javascript">
-			$(document).ready(setup(window.location.pathname));
-		</script>
 	<body>
 	
 
 		<div id="content"></div>
 
+		<!-- the scripts -->
+		<script src="/public/javascripts/knockout-2.0.0.debug.js" type="text/javascript"></script>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+		<script src="/public/javascripts/binding-helper.js" type="text/javascript"></script>
+		<script src="/public/javascripts/underscore.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			$(document).ready(setup(window.location.pathname));
+		</script>
 	</body>
 </html>

@@ -14,13 +14,13 @@ var userStatus = {
 						var self = this;
 						self.id = j._id;
 						self.name = j.name;
-						self.date = j.date;
+						self.created_on = j.created_on;
+						self.started_on = j.started_on;
 						self.done_on = j.done_on;
 						self.description = j.description;
-						self.type = j.type;
 						self.since = ko.computed(function() {
 							var dtime = this.done_on ? Date.parse(this.done_on) : Date.now();
-							var utime = dtime - Date.parse(this.date);
+							var utime = dtime - Date.parse(this.started_on);
 							var minutes = 60 * 1000;
 							var tStruct = {
 								minutes : parseInt(utime / minutes),
@@ -40,9 +40,14 @@ var userStatus = {
 							return ssince;
 						}, self);
 						self.shortDate = ko.computed(function() {
-							return (new Date(Date.parse(this.date))).toDateString();
+							return (new Date(Date.parse(this.started_on))).toDateString();
 						}, self);
 						self.prepUrl = '/status/' + self.name;
+						self.type = self.done_on 
+							? 'done' 
+							: self.started_on 
+								? 'current'
+								: 'next';
 						return self;
 					})(fromJson);
 			return d;
@@ -77,20 +82,24 @@ var userStatus = {
 
 		loadFrom : function (fromJson) {
 			var self = this;
+			var data = _.isArray(fromJson.list) ? fromJson.list : [fromJson.list];
 			this.name(fromJson.name);
-			var x = this.makeStatus(fromJson);
-			switch (x.type) {
-				case "current": 
-					this.currentStatus(x); 
-					this.currentStatusBak(x); 
-					break;
-				case "next": this.nextStatuses.push(x); break;
-				case "previous": this.previousStatuses.push(x); break;
-				default: 
-					console.error("Don't know how to handle type: %s on", x.type, fromJson);
-					break;
+			data.forEach(function (status) {
+				var x = self.makeStatus(status);
 
-			}
+				switch (x.type) {
+					case "current": 
+						self.currentStatus(x); 
+						self.currentStatusBak(x); 
+						break;
+					case "next": self.nextStatuses.push(x); break;
+					case "done": self.previousStatuses.push(x); break;
+					default: 
+						 console.error("Don't know how to handle type: %s on", x.type, fromJson);
+					 	 break;
+
+				}
+			});
 		},
 	},
 
@@ -104,7 +113,7 @@ var userStatus = {
 
 	loadData : function(parts) {
 		var self = this;
-		var uris = _(['current', 'next', 'prev']).map(function(x) {
+		var uris = _(['current', 'next', 'done']).map(function(x) {
 			return getURI('text/vnd.borax-data-root', { entity:parts.entity, data_uri : parts.id + '/' + x });
 		});
 		loadJson(

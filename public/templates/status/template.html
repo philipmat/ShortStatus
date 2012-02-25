@@ -6,35 +6,35 @@
 			Currently: 
 			<span class="member-status callout border-callout" data-bind="visible: !$root.newMode()">
 				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : date}"></span>.)</span>
-			</span>
-			<span data-bind="visible: $root.newMode">
-				<textarea data-bind="text: description"></textarea>
-				<button data-bind="click: $root.save">Post</button>
-				<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
+				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span>.)</span>
 			</span>
 		</p>
+		<span data-bind="visible: $root.newMode">
+			<textarea data-bind="text: description"></textarea>
+			<button data-bind="click: $root.save">Post</button>
+			<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
+		</span>
 	</div>
 	<a href="#" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
 
 	<div id="#details">
 		<div id="#next-statuses">
 			<h2>Next on the list</h2>
-			<div data-bind="foreach: nextStatuses">
-				<span class="member-status callout border-callout">
-					<span class="member-status-text" data-bind="text: description"></span>
-					<a href="#" data-bind="click : $root.makeCurrent">Work on this</a>
-				</span>
-			</div>
+			<ul data-bind="foreach: nextStatuses">
+				<li>
+				<span class="member-status-text" data-bind="text: description"></span>
+				<a href="#" data-bind="click : $root.makeCurrent">Work on this</a>
+				</li>
+			</ul>
 			<h2>Previously worked on</h2>
-			<div data-bind="foreach: previousStatuses">
-				<span class="member-status callout border-callout">
-					<span class="member-status-text" data-bind="text: description"></span>
-					<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span> 
-						starting on 
-						<span data-bind="text: shortDate, attr : { title : date }"></span>)</span>
-				</span>
-			</div>
+			<ul data-bind="foreach: previousStatuses">
+				<li>
+				<span class="member-status-text" data-bind="text: description"></span>
+				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span> 
+					starting on 
+					<span data-bind="text: shortDate, attr : { title : started_on }"></span>)</span>
+				</li>
+			</ul>
 		</div>
 	</div> <!-- #details -->
 	<!-- /nko -->

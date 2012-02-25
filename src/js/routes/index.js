@@ -88,45 +88,26 @@ exports.configure = function(app) {
 		}
 	});
 
+	function show_status(name, status, callback) {
+		console.log('%s status for: %s.', status, name);
+		var stat = db.view(VIEW_NS, VIEW_STAT, {key:[status, name]}, function(x,data) {
+			callback(_(data.rows).map(function(r) {
+				return r.value;
+			}));
+		});
+	}
 
-	app.get('/data/status/:name/current', function(req, res, next) {
-		console.log('current status for: %s.', req.params.name);
-		var stat = db.view(VIEW_NS, VIEW_STAT, {keys:[req.params.name]}, function(x,data) {
-			res.json(data.rows[0].value);
+	app.get('/data/status/:name/:status', function(req, res, next) {
+		var name = req.params.name
+			, status = req.params.status;
+		show_status(name, status, function(rows) {
+			res.json({name:name, status:status, list:rows});
 		});
 	});
-	app.post('/data/status/:name/current', function(req, res, next) {}); // marks a new status as current for this user
 
-	app.get('/data/status/:name/next', function(req, res, next) {
-		console.log('next status for: %s.', req.params.name);
-		res.json(
-			{
-   				"_id": "920b80c0e0035948d4ef162f14001fad",
-   				"_rev": "4-4ce59e5826cc626ac227c06d84c248aa",
-   				"type": "next",
-   				"date": "",
-   				"name": "philipmat",
-   				"description": "Creating view for current, next, and previous statuses"
-			}
-			);
-	});
-	app.post('/data/status/:name/next', function(req, res, next) {}); // adds a new status to the next list
-	app.put('/data/status/:name/next/:id', function(req, res, next) {}); // updates a next status
+	app.post('/data/status/:name', function(req, res, next) {}); // adds a new status to the next list
+	app.put('/data/status/:name', function(req, res, next) {}); // updates a next status
 
-	app.get('/data/status/:name/prev', function(req, res, next) {
-		console.log('previous statuses for: %s.', req.params.name);
-		res.json(
-			{
-   				"_id": "920b80c0e0035948d4ef162f14000a98",
-   				"_rev": "5-9851eea57f2ac2816b1b78507a348322",
-   				"type": "previous",
-   				"date": "2012-01-30 23:32:00",
-   				"done_on": "2012-01-31 03:15:00",
-   				"name": "philipmat",
-   				"description": "Creating couch document"
-			}
-			);
-	});
 
 	app.get('/data/status/:name?', function(req, res, next) {
 		console.log('Status for %s.', req.params.name || 'all');
