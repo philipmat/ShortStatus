@@ -86,7 +86,11 @@ var userStatus = {
 			
 			//console.log(this);
 			//console.log(post);
-			userStatus.update(post);
+			userStatus.update(post, function(data) {
+				var vm = userStatus.ViewModel;
+				vm.loadFrom(data);
+				vm.newMode(false);
+			});
 		},
 
 		cancelEdit: function() {
@@ -127,7 +131,7 @@ var userStatus = {
 		bind(this.ViewModel);
 	},
 
-	update: function(status) {
+	update: function(status, callback) {
 		console.log('update with status:', status);
 		var uri = getURI('text/vnd.borax-data-root', { 
 			entity: userStatus.entity, 
@@ -138,7 +142,7 @@ var userStatus = {
 			contentType:'application/json',
 			data: JSON.stringify(status),
 			success: function(data) {
-				userStatus.load(data);	
+				callback(data);
 			},
 			error: function(error) {
 				console.log('error: ', error);
