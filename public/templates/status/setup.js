@@ -68,7 +68,7 @@ var userStatus = {
 			vm.newMode(true);
 		},
 
-		save: function() {
+		saveCurrent: function() {
 			// this is a KO object
 			var post = {}, newObject = false;
 			if (this.id) {

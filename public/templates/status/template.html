@@ -1,4 +1,5 @@
 <script type="text/html" id="status-template" append-to='head'>
+	<a href="/teams/">Teams</a>
 	<!-- nko if: name -->
 	<h1><span data-bind="text: name"></span>'s status</h1>
 	<div data-bind="with: currentStatus">
@@ -11,7 +12,7 @@
 		</p>
 		<span data-bind="visible: $root.newMode">
 			<textarea data-bind="value: description"></textarea>
-			<button data-bind="click: $root.save">Post</button>
+			<button data-bind="click: $root.saveCurrent">Post</button>
 			<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
 		</span>
 	</div>
