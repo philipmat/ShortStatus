@@ -3,18 +3,29 @@
 	<!-- nko if: name -->
 	<h1><span data-bind="text: name"></span>'s status</h1>
 	<div data-bind="with: currentStatus">
-		<p class="status">
-			Currently: 
-			<span class="member-status callout border-callout" data-bind="visible: !$root.newMode()">
-				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span>.)</span>
-			</span>
-		</p>
-		<span data-bind="visible: $root.newMode">
-			<textarea data-bind="value: description"></textarea>
-			<button data-bind="click: $root.saveCurrent">Post</button>
-			<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
+		<p class="status" data-bind="visible: !$root.newMode()">
+		Currently: 
+		<span class="member-status callout border-callout">
+			<span class="member-status-text" data-bind="text: description"></span>
+			<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span>.)</span>
 		</span>
+		</p>
+	</div>
+	<div data-bind="visible: $root.newMode, with: newStatus">
+		<div>
+			When: 
+			<label for="when-now"><input id="when-now" type="radio" name="when" value="now" data-bind="checked: nowOrLater"/> Now</label>
+			<label for="when-later"><input id="when-later" type="radio" name="when" value="later" data-bind="checked: nowOrLater"/> Later</label>
+		</div>
+		<div>
+			<label for="description">
+				Doing: 
+				<textarea id="description" data-bind="value: description"></textarea>
+			</label>
+		</div>
+
+		<button data-bind="click: $root.save">Post</button>
+		<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
 	</div>
 	<a href="#" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
 

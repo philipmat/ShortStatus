@@ -120,6 +120,7 @@ exports.configure = function(app) {
 	app.post('/data/status/:name/:id?', function(req, res, next) {
 		var name = req.params.name, id = req.params.id;
 		var started_on = req.body.started_on;
+		var now = new Date(Date.now()).toISOString();
 		if (id !== undefined) {
 			// updating an existing status
 			console.log('updating existing document: %s', id);
@@ -140,7 +141,6 @@ exports.configure = function(app) {
 				// 2. make the new one active
 				get_status(name, 'current', function(status_rows) {
 					var previous = null;
-					var now = new Date(Date.now()).toISOString();
 					if(!_.isEmpty(status_rows)) {
 						// obsolete status
 						previous = status_rows[0];
@@ -173,6 +173,16 @@ exports.configure = function(app) {
 			} else {
 				// a new next status was created
 				console.log('new next');
+				var status = {
+					created_on: now,
+					description: req.body.description,
+					name: name
+				};
+				update_status(status, function(err, docId) {
+					db.get(docId, function(e, doc) {
+						res.json({ name: name, list: [doc]});
+					});
+				});
 			}
 		}
 

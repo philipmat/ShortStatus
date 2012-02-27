@@ -4,10 +4,13 @@ var userStatus = {
 		newMode: ko.observable(false),
 		name: ko.observable(),
 		currentStatus: ko.observable(),
-		currentStatusBak: ko.observable(),
 		team: ko.observable(),
 		nextStatuses: ko.observableArray([]),
 		previousStatuses: ko.observableArray([]),
+		newStatus : {
+			nowOrLater : ko.observable('now'),
+			description: ko.observable(''),
+		},
 
 		makeStatus: function(fromJson) {
 			var d = new (function (j) {
@@ -36,7 +39,7 @@ var userStatus = {
 								ssince += tStruct.hours + " hours";
 							} else if (tStruct.hours > 0 ) {
 								ssince += tStruct.hours + " hours and " + (tStruct.minutes % 60) + " minutes";
-							} else return "Under an hour";
+							} else return "under an hour";
 							return ssince;
 						}, self);
 						self.shortDate = ko.computed(function() {
@@ -64,53 +67,44 @@ var userStatus = {
 		create: function() {
 			var vm = userStatus.ViewModel;
 			var name = vm.name();
-			vm.currentStatus(vm.makeStatus({name:name}));
 			vm.newMode(true);
 		},
 
-		saveCurrent: function() {
+		save: function(newStatus) {
 			// this is a KO object
 			var post = {}, newObject = false;
-			if (this.id) {
-				post.id = this.id; // update
-				newObject = false;
-			} else {
-				newObject = true;
-				// new 
-				post.created_on = post.started_on = Date.now();
-			}
-
-			post.started_on = this.started_on || Date.now();
-			post.description = this.description;
-			post.name = this.name;
+			post.created_on = Date.now();
+			if (newStatus.nowOrLater() === 'now') 
+				post.started_on = post.created_on;
+			post.description = newStatus.description();
+			post.name = userStatus.ViewModel.name();
 			
-			//console.log(this);
-			//console.log(post);
 			userStatus.update(post, function(data) {
 				var vm = userStatus.ViewModel;
 				vm.loadFrom(data);
+				newStatus.description('');
 				vm.newMode(false);
 			});
 		},
 
 		cancelEdit: function() {
 			var vm = userStatus.ViewModel;
-			vm.currentStatus(vm.currentStatusBak());
 			vm.newMode(false);
 		},
 
 
 		loadFrom: function (fromJson) {
+			console.log(fromJson);
 			var self = this;
 			var data = _.isArray(fromJson.list) ? fromJson.list: [fromJson.list];
 			this.name(fromJson.name);
 			data.forEach(function (status) {
+				console.log('loadFrom.data.status:', status);
 				var x = self.makeStatus(status);
 
 				switch (x.type) {
 					case "current": 
 						self.currentStatus(x); 
-						self.currentStatusBak(x); 
 						break;
 					case "next": self.nextStatuses.push(x); break;
 					case "done": self.previousStatuses.push(x); break;
@@ -128,11 +122,14 @@ var userStatus = {
 	}, 
 
 	loadDone: function (fromAllJson) {
-		bind(this.ViewModel);
+		var vm = this.ViewModel;
+		if (!vm.currentStatus()) vm.newMode(true);
+		bind(vm);
 	},
 
 	update: function(status, callback) {
 		console.log('update with status:', status);
+		//return;
 		var uri = getURI('text/vnd.borax-data-root', { 
 			entity: userStatus.entity, 
 			data_uri: status.name + (status.id ? '/' + status.id : '') });
