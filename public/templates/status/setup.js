@@ -56,8 +56,18 @@ var userStatus = {
 			return d;
 		}, 
 
-		makeCurrent: function(status) {
-			console.log(ko.toJSON(status));
+		makeCurrent: function(nextStatus) {
+			var status = ko.toJS(nextStatus);
+			_(['since', 'shortDate', 'prepUrl']).each(function(prop) {
+				delete status[prop];
+			});
+			status.started_on = Date.now();
+			userStatus.update(status, function(data) {
+				var vm = userStatus.ViewModel;
+				vm.loadFrom(data);
+				vm.newMode(false);
+				vm.nextStatuses.remove(nextStatus);
+			});
 		},
 		
 		edit: function() {
@@ -94,12 +104,12 @@ var userStatus = {
 
 
 		loadFrom: function (fromJson) {
-			console.log(fromJson);
+			console.log('loadFrom:', fromJson);
 			var self = this;
 			var data = _.isArray(fromJson.list) ? fromJson.list: [fromJson.list];
 			this.name(fromJson.name);
 			data.forEach(function (status) {
-				console.log('loadFrom.data.status:', status);
+				//console.log('loadFrom.data.status:', status);
 				var x = self.makeStatus(status);
 
 				switch (x.type) {
@@ -128,7 +138,6 @@ var userStatus = {
 	},
 
 	update: function(status, callback) {
-		console.log('update with status:', status);
 		//return;
 		var uri = getURI('text/vnd.borax-data-root', { 
 			entity: userStatus.entity, 
@@ -150,8 +159,19 @@ var userStatus = {
 
 	loadData: function(parts) {
 		var self = this;
-		var uris = _(['current', 'next', 'done']).map(function(x) {
-			return getURI('text/vnd.borax-data-root', { entity:parts.entity, data_uri: parts.id + '/' + x });
+		var statuses = {
+			current : {},
+			next: { sort: 'asc' },
+			done: { sort: 'desc', limit: 10 }
+		};
+		var uris = _(statuses).map(function(statusConfig, status) {
+			return getURI('text/vnd.borax-data-root', { 
+				entity:parts.entity
+				,data_uri: parts.id + '/' + status + '?' + 
+					_(statusConfig).map(function(v, k) {
+						return k + '=' + v;
+					}).join('&')
+			});
 		});
 		loadJson(
 				uris,

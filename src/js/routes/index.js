@@ -88,10 +88,18 @@ exports.configure = function(app) {
 		}
 	});
 
-	function get_status(name, status, callback) {
-		console.log('%s status for: %s.', status, name);
-		var stat = db.view(VIEW_NS, VIEW_STAT, {key:[status, name]}, function(x,data) {
-			callback(_(data.rows).map(function(r) {
+	function get_status(name, status, params, callback) {
+		var options = {}, onDone = null;
+		if (_.isFunction(params)) {
+			onDone = params;
+		} else {
+			options = params;
+			onDone = callback;
+		}
+		options.key = [status, name];
+		console.log('%s status for: %s. params: ', status, name, options);
+		var stat = db.view(VIEW_NS, VIEW_STAT, options, function(x,data) {
+			onDone(_(data.rows).map(function(r) {
 				return r.value;
 			}));
 		});
@@ -112,7 +120,14 @@ exports.configure = function(app) {
 	app.get('/data/status/:name/:status', function(req, res, next) {
 		var name = req.params.name
 			, status = req.params.status;
-		get_status(name, status, function(rows) {
+		console.log('query:', req.query);
+		console.log('params:', req.params);
+
+		var options = {};
+		if (req.query.limit !== undefined) options.limit = req.query.limit;
+		if (req.query.sort !== undefined && req.query.sort == 'desc') options.descending = true;
+
+		get_status(name, status, options, function(rows) {
 			res.json({name:name, status:status, list:rows});
 		});
 	});
@@ -128,8 +143,31 @@ exports.configure = function(app) {
 				// another status was made current
 				// or an existing current status was updated
 				console.log('update or activate');
+				get_status(name, 'current', function(status_rows) {
+					var previous = null;
+					if (!_.isEmpty(status_rows)) {
+						previous = status_rows[0];
+						previous.done_on = now;
+					}
+					console.log('previous current:', previous);
+					db.get(id, function(e, nextDoc) {
+						nextDoc.started_on = now;
+						var docs = [ nextDoc ];
+						if (previous !== null) docs.push(previous);
+						console.log('updating %d docs.', docs.length);
+
+						async.forEach(docs, function(updateThisDoc, next) {
+							console.log('updating:', updateThisDoc);
+							update_status(updateThisDoc, function(err, updatedId) {
+								next();
+							});
+						}, function (err) {
+							res.json( { name : name, list: docs } );
+						});
+					});
+				});
 			} else {
-				// a new status was added
+				// a new status was updated
 				console.log('update next document');
 			}
 		} else {
@@ -194,5 +232,6 @@ exports.configure = function(app) {
 
 	app.get('/data/status/:name?', function(req, res, next) {
 		console.log('Status for %s.', req.params.name || 'all');
+		res.json({});
 	});
 }
