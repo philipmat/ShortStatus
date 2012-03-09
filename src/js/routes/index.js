@@ -106,6 +106,7 @@ exports.configure = function(app) {
 	}
 
 	function update_status(status, callback) {
+		console.log('update_status:', status);
 		db.insert(status, function(e,b,h) {
 			console.log('update.ERROR:', e);
 			console.log('update.BODY:', b);
@@ -135,7 +136,11 @@ exports.configure = function(app) {
 	app.post('/data/status/:name/:id?', function(req, res, next) {
 		var name = req.params.name, id = req.params.id;
 		var started_on = req.body.started_on;
-		var now = new Date(Date.now()).toISOString();
+		var res_out = function(doc) {
+			var docs = _.isArray(doc) ? doc : [doc];
+			res.json({name: name, list: docs});	
+		}
+
 		if (id !== undefined) {
 			// updating an existing status
 			console.log('updating existing document: %s', id);
@@ -143,89 +148,73 @@ exports.configure = function(app) {
 				// another status was made current
 				// or an existing current status was updated
 				console.log('update or activate');
-				get_status(name, 'current', function(status_rows) {
-					var previous = null;
-					if (!_.isEmpty(status_rows)) {
-						previous = status_rows[0];
-						previous.done_on = now;
-					}
-					console.log('previous current:', previous);
-					db.get(id, function(e, nextDoc) {
-						nextDoc.started_on = now;
-						var docs = [ nextDoc ];
-						if (previous !== null) docs.push(previous);
-						console.log('updating %d docs.', docs.length);
-
-						async.forEach(docs, function(updateThisDoc, next) {
-							console.log('updating:', updateThisDoc);
-							update_status(updateThisDoc, function(err, updatedId) {
-								next();
-							});
-						}, function (err) {
-							res.json( { name : name, list: docs } );
-						});
-					});
-				});
+				make_current(id, name, res_out);
 			} else {
 				// a new status was updated
 				console.log('update next document');
 			}
 		} else {
 			// a new status was created
-			if (started_on !== undefined) {
-				console.log('new current');
-				// a new current status was created:
-				// 1. obsolete the old one
-				// 2. make the new one active
-				get_status(name, 'current', function(status_rows) {
-					var previous = null;
-					if(!_.isEmpty(status_rows)) {
-						// obsolete status
-						previous = status_rows[0];
-						previous.done_on = now;
-					}
-					var current = {
-						created_on: now,
-						started_on: now,
-						name: name,
-						description: req.body.description
-					}
-
-					var docs = { name: name, list: []};
-					if (previous != null)
-						update_status(previous, function() {});
-					update_status(current, function(err, updatedId) {
-						var ids = [previous._id, updatedId];
-						console.log('getting docs for ids:', ids);
-						async.forEach(ids, function (docId, next) {
-							db.get(docId, function (e,doc) {
-								console.log('for %s got doc:', docId, doc);
-								docs.list.push(doc);
-								next();
-							});
-						}, function (err) {
-							res.json(docs);
-						});
-					});
-				});
-			} else {
-				// a new next status was created
-				console.log('new next');
-				var status = {
-					created_on: now,
-					description: req.body.description,
-					name: name
-				};
-				update_status(status, function(err, docId) {
-					db.get(docId, function(e, doc) {
-						res.json({ name: name, list: [doc]});
-					});
-				});
-			}
+			var status = {
+				created_on: new Date(Date.now()).toISOString(),
+				description: req.body.description,
+				name: name
+			};
+			add_new(status, function(doc) {
+				if (started_on !== undefined) {
+					make_current(doc._id, name, res_out);
+				} else {
+					res_out(doc);
+				}
+			});
 		}
 
 		console.log(req.body);
 	});
+
+	function mark_done(status_rows, when) {
+		if (!_.isEmpty(status_rows)) {
+			status_rows[0].done_on = when;
+			return status_rows[0];
+		}
+	}
+
+	function make_current(id, name, callback) {
+		var now = new Date(Date.now()).toISOString();
+		var final_docs = [];
+		get_status(name, 'current', function(status_rows) {
+			var previous = mark_done(status_rows, now);
+			if (previous) final_docs.push(previous);
+
+			console.log('previous current:', previous);
+			db.get(id, function(e, nextDoc) {
+				nextDoc.started_on = now;
+				final_docs.push(nextDoc);
+				console.log('updating %d docs.', final_docs.length);
+
+				async.forEach(final_docs, function(updateThisDoc, next) {
+					console.log('updating:', updateThisDoc);
+					update_status(updateThisDoc, function(err, updatedId) {
+						next();
+					});
+				}, function (err) {
+					callback(final_docs);
+				});
+			});
+		});
+	}
+
+	function add_new(status, callback) {
+		update_status(status, function(err, docId) {
+			console.log('add_new.err:', err);
+			console.log('add_new.docId:', docId);
+			db.get(docId, function(e, doc) {
+				console.log('add_new.e:', e);
+				console.log('add_new.doc:', doc);
+				callback(doc);
+			});
+		});
+	}
 
 	app.put('/data/status/:name', function(req, res, next) {});
 
