@@ -13,7 +13,7 @@ var VIEW_STAT = 'status_by_member';
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
-	console.log('Serving static: %s', pub);
+	//console.log('Serving static: %s', pub);
   	res.sendfile(pub);
 }
 
@@ -38,8 +38,9 @@ function servePublic(file, req, res) {
 
 exports.configure = function(app) {
 	app.get(/^\/(.+)\/?/, function(req,res,next) {
-		console.log(req.params);
+		//console.log(req.params);
 		var url = req.params[0];
+		console.log('url:%s', url);
 		if (url.indexOf('public') === 0) {
 			//servePublicFile(url, req, res);
 			servePublicFile(url, req, res);
@@ -64,9 +65,9 @@ exports.configure = function(app) {
 
 				async.forEach(team.team_members, 
 					function(t_m, on_done) {
-						db.view(VIEW_NS, VIEW_STAT, { key: ['current', t_m] }, function(x, data) {
-							data.rows.forEach(function(row) {
-								team.current.push(row.value);
+						get_status(t_m, 'current', function(docs) {
+							_(docs).each(function(doc) {
+								team.current.push(doc);
 							});
 							on_done();
 						});
@@ -75,7 +76,6 @@ exports.configure = function(app) {
 						if (err) { 
 							console.log('async.forEach(team.team_members) errored out:', err);
 						};
-						console.log(team);
 						res.json(team);
 					}
 				);
@@ -101,8 +101,9 @@ exports.configure = function(app) {
 		options.startkey = options.descending === true ? endkey : startkey;
 		options.endkey = options.descending === true ? startkey : endkey;
 
-		console.log('%s status for: %s. params: ', status, name, options);
+		//console.log('%s status for: %s. params: ', status, name, options);
 		var stat = db.view(VIEW_NS, VIEW_STAT, options, function(x,data) {
+			//console.log('get_status:', data.rows);
 			onDone(_(data.rows).map(function(r) {
 				return r.doc;
 			}));
