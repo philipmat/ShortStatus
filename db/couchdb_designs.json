@@ -1,0 +1,12 @@
+{
+   "_id": "_design/shortstatus",
+   "language": "javascript",
+   "views": {
+       "teams_and_members": {
+           "map": "function(doc) {\n  if (doc.team_name !== undefined) {\n    emit(doc.team_name, doc.team_members);\n  }\n}"
+       },
+       "status_by_member": {
+           "map": "function(doc) {\n  if(doc.name) {\n    if(doc.done_on) {\n      emit(['done',doc.name, doc.done_on],null);\n    } else if(doc.started_on) {\n      emit(['current',doc.name, doc.started_on],null);\n    } else if(doc.created_on) {\n      emit(['next',doc.name,doc.created_on],null);\n    }\n  }\n}"
+       }
+   }
+}
