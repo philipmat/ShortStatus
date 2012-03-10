@@ -148,9 +148,12 @@ function loadJson(uri, callback) {
 function includeHelper(parts) {
 	var uri = getURI('text/vnd.borax-helper', parts),
 		ns = parts.ns;
+	console.log('includeHelper:', uri);
 	loadScript(uri, (function(args) {
 				return function(scriptUri) {
 					//console.log('Loaded %s.', scriptUri, args);
+					var entity = args.entity || 'default';
+					if (window.shortstatus === undefined) return; // the loaded script didn't attach itself to the entity
 					window.shortstatus[args.entity].setup(args);
 				};
 			})(parts));
