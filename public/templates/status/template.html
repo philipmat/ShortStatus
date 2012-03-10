@@ -30,7 +30,7 @@
 	<a href="#" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
 
 	<div id="#details">
-		<div id="#next-statuses">
+		<div id="#next-statuses" data-bind="visible: nextStatuses().length">
 			<h2>Next on the list</h2>
 			<ul data-bind="foreach: nextStatuses">
 				<li>
@@ -38,6 +38,8 @@
 				<a href="#" data-bind="click : $root.makeCurrent">Work on this</a>
 				</li>
 			</ul>
+		</div>
+		<div id="#done-statuses" data-bind="visible: previousStatuses().length">
 			<h2>Previously worked on</h2>
 			<ul data-bind="foreach: previousStatuses">
 				<li>
