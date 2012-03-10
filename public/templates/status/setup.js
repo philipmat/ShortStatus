@@ -12,6 +12,14 @@ var userStatus = {
 			description: ko.observable(''),
 		},
 
+		sortByDate : function(date_property) {
+			return function(left, right) {
+				var dateL = left[date_property],
+					dateR = right[date_property];
+				return dateL == dateR ? 0 : (dateL < dateR ? -1 : 1);
+			}
+		},
+
 		makeStatus: function(fromJson) {
 			var d = new (function (j) {
 						var self = this;
@@ -124,6 +132,8 @@ var userStatus = {
 
 				}
 			});
+			self.nextStatuses.sort(userStatus.ViewModel.sortByDate('created_on'));
+			self.previousStatuses.sort(userStatus.ViewModel.sortByDate('done_on')).reverse();
 		},
 	},
 
