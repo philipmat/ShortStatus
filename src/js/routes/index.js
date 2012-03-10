@@ -81,7 +81,7 @@ exports.configure = function(app) {
 				);
 			});
 		} else {
-			db.view(VIEW_NS, VIEW_TEAM, {include_docs:true}, function(x,data) {
+			db.view(VIEW_NS, VIEW_TEAM, {include_docs: true}, function(x,data) {
 				res.json(_(data.rows).map(function(v) {
 					return v.doc; }));
 			});
@@ -89,18 +89,22 @@ exports.configure = function(app) {
 	});
 
 	function get_status(name, status, params, callback) {
-		var options = {}, onDone = null;
+		var options = {include_docs: true}, onDone = null;
 		if (_.isFunction(params)) {
 			onDone = params;
 		} else {
-			options = params;
+			_.extend(options, params);
 			onDone = callback;
 		}
-		options.key = [status, name];
+
+		var startkey = [status, name, null], endkey = [status, name, {}];
+		options.startkey = options.descending === true ? endkey : startkey;
+		options.endkey = options.descending === true ? startkey : endkey;
+
 		console.log('%s status for: %s. params: ', status, name, options);
 		var stat = db.view(VIEW_NS, VIEW_STAT, options, function(x,data) {
 			onDone(_(data.rows).map(function(r) {
-				return r.value;
+				return r.doc;
 			}));
 		});
 	}
@@ -129,7 +133,7 @@ exports.configure = function(app) {
 		if (req.query.sort !== undefined && req.query.sort == 'desc') options.descending = true;
 
 		get_status(name, status, options, function(rows) {
-			res.json({name:name, status:status, list:rows});
+			res.json({name: name, status: status, list: rows});
 		});
 	});
 
