@@ -1,20 +1,30 @@
 <script type="text/html" id="teams-template" append-to='head'>
 	<!-- ko if: length -->
-	<h1>Teams</h1>
-	<ul data-bind="foreach: $data" class="team-list">
-		<li>
-			<a data-bind="attr: { href: prepUrl }, text: teamName"></a>: 
-			<ul data-bind="foreach: teamMembers" class="team-member-list">
-				<li><a data-bind="attr : { href: $data.prepUrl }, text : name"></a><span data-bind="ifnot: $parent.teamMembers.last($data)">, </span></li>
-			</ul>
-			</li>
-	</ul>	
+	<header class="jumbotron subhead">
+		<h1>Dashboard</h1>
+		<p class="lead">The current status of your teams and their members.</p>
+	</header>
+
+	<section>
+	<div data-bind="foreach: $data">
+		<div class="row">	
+			<div class="span2">
+				<a data-bind="attr: {href: prepUrl}"><h2 data-bind="text: teamName">Team Name</h2><i class="icon-th-list"></i></a>
+			</div>
+			<div class="span6">
+				<ul data-bind="foreach: teamMembers" class="team-member-list">
+					<li><a data-bind="attr : { href: $data.prepUrl }, text : name"></a><span data-bind="ifnot: $parent.teamMembers.last($data)">, </span></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	</section>
 	<!-- /ko -->
 </script>
 
 <script type="text/html" id="team-template" append-to='head'>
 	<!-- ko if: id -->
-	<h1><a href=".">Team</a>: <span data-bind="text: teamName"></span></h1>
+	<h1><span data-bind="text: teamName"></span></h1>
 	<div data-bind="foreach: currentStatuses">
 		<p class="status">
 			<a class="member-name" data-bind="text: member, attr : { href: prepUrl }"></a>
@@ -33,3 +43,6 @@
 
 <div data-bind="template: { name: 'teams-template', data: teams }" append-to='#content'></div>
 <div data-bind="template: { name: 'team-template', data : team }" append-to='#content'></div>
+<ul class="nav" append-to='#nav-details'>
+	<li data-bind="visible: team.id" class="hide"><a href="/teams">Teams</a></li>
+</ul>
