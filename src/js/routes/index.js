@@ -143,7 +143,7 @@ exports.configure = function(app) {
 		var started_on = req.body.started_on;
 		var res_out = function(doc) {
 			var docs = _.isArray(doc) ? doc : [doc];
-			res.json({name: name, list: docs});	
+			res.json({name: name, list: docs}, 201);	
 		}
 
 		if (id !== undefined) {
