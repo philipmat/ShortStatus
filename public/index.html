@@ -1,16 +1,19 @@
 <html>
 	<head>
+		<link rel="stylesheet" type="text/css" href="/public/bootstrap/css/bootstrap.css" />
 		<link rel="uri-template" type="text/vnd.borax-helper" href="/public/templates/{entity}/setup.js"></link>
 		<link rel="uri-template" type="text/vnd.borax-template-root" href="/public/templates/{template_uri}"></link>
 		<link rel="uri-template" type="text/vnd.borax-data-root" href="/data/{entity}/{data_uri}"></link>
+	</head>
 	<body>
 	
 
-		<div id="content"></div>
+		<div id="content" class="container"></div>
 
 		<!-- the scripts -->
 		<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>-->
 		<script src="/public/javascripts/jquery.js" type="text/javascript"></script>
+		<script src="/public/bootstrap/js/bootstrap.js" type="text/javascript"></script>
 		<script src="/public/javascripts/knockout-2.0.0.debug.js" type="text/javascript"></script>
 		<script src="/public/javascripts/binding-helper.js" type="text/javascript"></script>
 		<script src="/public/javascripts/underscore.js" type="text/javascript"></script>
