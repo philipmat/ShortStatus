@@ -20,20 +20,29 @@
 
 <script type="text/html" id="team-template" append-to='head'>
 	<!-- ko if: id -->
-	<h1><span data-bind="text: teamName"></span></h1>
-	<div data-bind="foreach: currentStatuses">
-		<p class="status">
-			<a class="member-name" data-bind="text: member, attr : { href: prepUrl }"></a>
-			<!-- ko if: status -->
-			<span class="member-status callout border-callout" data-bind="with: status">
-				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : started_on}"></span>)</span>
-			</span>
-			<!-- /ko -->
-			<span data-bind="ifnot: status">No status available.</span>
-		</p>
+	<div class="page-header">
+		<h1 data-bind="text: teamName"></h1>
 	</div>
-	<!-- /ko -->
+	<div data-bind="foreach: currentStatuses">
+		<div class="row">
+			<div class="span1 member-name">
+				<a class="member-name" data-bind="text: member, attr : { href: prepUrl}"></a>
+			</div>
+			<div class="span6">
+				<!-- ko if: status -->
+				<div class="well member-status" data-bind="with: status">
+					<span class="member-status-text" data-bind="text: description"></span>
+					<span class="member-status-since">
+						(For
+						<abbr data-bind="text: since, attr : { title : started_on}"></abbr>
+						)
+					</span>
+				</div>
+				<!-- /ko -->
+				<span data-bind="ifnot: status">No status available.</span>
+			</div>
+		</div>
+	</div>
 	<!-- /ko -->
 </script>
 
