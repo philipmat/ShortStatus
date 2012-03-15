@@ -7,15 +7,11 @@
 
 	<section>
 	<div data-bind="foreach: $data">
-		<div class="row">	
-			<div class="span2">
-				<a data-bind="attr: {href: prepUrl}"><h2 data-bind="text: teamName">Team Name</h2><i class="icon-th-list"></i></a>
-			</div>
-			<div class="span6">
-				<ul data-bind="foreach: teamMembers" class="team-member-list">
-					<li><a data-bind="attr : { href: $data.prepUrl }, text : name"></a><span data-bind="ifnot: $parent.teamMembers.last($data)">, </span></li>
-				</ul>
-			</div>
+		<div class="team well pull-left">	
+			<a data-bind="attr: {href: prepUrl}"><h2 data-bind="text: teamName">Team Name</h2></a>
+			<ul data-bind="foreach: teamMembers" class="team-member-list">
+				<li><a data-bind="attr : { href: $data.prepUrl }, text : name"></a></li>
+			</ul>
 		</div>
 	</div>
 	</section>
