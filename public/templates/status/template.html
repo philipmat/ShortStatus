@@ -1,52 +1,66 @@
 <script type="text/html" id="status-template" append-to='head'>
-	<a href="/teams/">Teams</a>
 	<!-- nko if: name -->
-	<h1><span data-bind="text: name"></span>'s status</h1>
+
+	<div class="page-header">
+		<h1><span data-bind="text: name"></span>'s status</h1>
+	</div>
 	<div data-bind="with: currentStatus">
-		<p class="status" data-bind="visible: !$root.newMode()">
-		Currently: 
-		<span class="member-status callout border-callout">
-			<span class="member-status-text" data-bind="text: description"></span>
-			<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span>.)</span>
-		</span>
-		</p>
-	</div>
-	<div data-bind="visible: $root.newMode, with: newStatus">
-		<div>
-			When: 
-			<label for="when-now"><input id="when-now" type="radio" name="when" value="now" data-bind="checked: nowOrLater"/> Now</label>
-			<label for="when-later"><input id="when-later" type="radio" name="when" value="later" data-bind="checked: nowOrLater"/> Later</label>
+		<div class="row">
+			<div class="span6" class="status" data-bind="visible: !$root.newMode()">
+				<blockquote class="member-status callout border-callout">
+					<span class="member-status-text" data-bind="text: description"></span>
+					<small class="member-status-since">
+						(For <abbr data-bind="text: since, attr : { title : started_on }"></abbr>.)
+					</small>
+				</blockquote>
+			</div>
 		</div>
-		<div>
-			<label for="description">
-				Doing: 
-				<textarea id="description" data-bind="value: description"></textarea>
-			</label>
-		</div>
-
-		<button data-bind="click: $root.save">Post</button>
-		<a href="#" data-bind="click: $root.cancelEdit">Nevermind</a>
 	</div>
-	<a href="#" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
 
-	<div id="#details">
-		<div id="#next-statuses" data-bind="visible: nextStatuses().length">
+	<div class="row">
+		<form class="span6" data-bind="visible: $root.newMode, with: newStatus">
+			<fieldset>
+				<label for="description">Doing:</label>
+				<textarea id="description" data-bind="value: description" placeholder="Type your new status..."></textarea>
+
+				<div>
+					<label class="radio inline" for="when-now"><input id="when-now" type="radio" name="when" value="now" data-bind="checked: nowOrLater"/> Now</label>
+					<label class="radio inline" for="when-later"><input id="when-later" type="radio" name="when" value="later" data-bind="checked: nowOrLater"/> Later</label>
+				</div>
+			</fieldset>	
+
+			<div class="form-actions">
+				<input type="submit" class="btn btn-small btn-primary" data-bind="click: $root.save" value="Post" />
+				<a href="#" class="btn btn-small" data-bind="click: $root.cancelEdit">Nevermind</a>
+			</div>
+		</form>
+	</div>
+	<div class="row">
+		<div class="span1">
+			<a href="#" class="btn btn-mini" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
+		</div>
+	</div>
+
+	<hr />
+	<div class="row" id="#details">
+		<div class="span6" id="#next-statuses" data-bind="visible: nextStatuses().length">
 			<h2>Next on the list</h2>
 			<ul data-bind="foreach: nextStatuses">
 				<li>
 				<span class="member-status-text" data-bind="text: description"></span>
-				<a href="#" data-bind="click : $root.makeCurrent">Work on this</a>
+				<a href="#" title="Make this the current status" data-bind="click : $root.makeCurrent"> <i class="icon-forward"></i></a>
 				</li>
 			</ul>
 		</div>
-		<div id="#done-statuses" data-bind="visible: previousStatuses().length">
+		<div class="span6" id="#done-statuses" data-bind="visible: previousStatuses().length">
 			<h2>Previously worked on</h2>
 			<ul data-bind="foreach: previousStatuses">
 				<li>
 				<span class="member-status-text" data-bind="text: description"></span>
-				<span class="member-status-since">(For <span data-bind="text: since, attr : { title : done_on}"></span> 
+				<small class="member-status-since">
+					(For <abbr data-bind="text: since, attr : { title : done_on}"></abbr> 
 					starting on 
-					<span data-bind="text: shortDate, attr : { title : started_on }"></span>)</span>
+					<abbr data-bind="text: shortDate, attr : { title : started_on }"></abbr>)</small>
 				</li>
 			</ul>
 		</div>
