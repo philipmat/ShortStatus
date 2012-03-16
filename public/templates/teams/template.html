@@ -24,23 +24,22 @@
 		<h1 data-bind="text: teamName"></h1>
 	</div>
 	<div data-bind="foreach: currentStatuses">
-		<div class="row">
-			<div class="span1 member-name">
+		<blockquote class="member-status" data-bind="visible: status">
+			<span class="member-status-text" data-bind="text: status.description"></span>
+			<small>
 				<a class="member-name" data-bind="text: member, attr : { href: prepUrl}"></a>
-			</div>
-			<div class="span6">
-				<!-- ko if: status -->
-				<div class="well member-status" data-bind="with: status">
-					<span class="member-status-text" data-bind="text: description"></span>
-					<span class="member-status-since">
-						(For
-						<abbr data-bind="text: since, attr : { title : started_on}"></abbr>
-						)
-					</span>
-				</div>
-				<!-- /ko -->
-				<span data-bind="ifnot: status">No status available.</span>
-			</div>
+
+				<span class="member-status-since">
+					(For
+					<abbr data-bind="text: status.since, attr : { title : status.started_on}"></abbr>
+					)
+				</span>
+			</small>
+		</blockquote>
+		<div data-bind="ifnot: status">
+			<span data-bind="ifnot: status">
+				No status available for 
+				<a class="member-name" data-bind="text: member, attr : { href: prepUrl}"></a>.</span>
 		</div>
 	</div>
 	<!-- /ko -->
