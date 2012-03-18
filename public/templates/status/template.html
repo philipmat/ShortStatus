@@ -18,7 +18,7 @@
 	</div>
 
 	<div class="row">
-		<form class="span6" data-bind="visible: $root.newMode, with: newStatus">
+		<form class="span6 well" data-bind="visible: $root.newMode, with: newStatus">
 			<fieldset>
 				<label for="description">Doing:</label>
 				<textarea id="description" data-bind="value: description" placeholder="Type your new status..."></textarea>
@@ -29,15 +29,14 @@
 				</div>
 			</fieldset>	
 
-			<div class="form-actions">
-				<input type="submit" class="btn btn-small btn-primary" data-bind="click: $root.save" value="Post" />
-				<a href="#" class="btn btn-small" data-bind="click: $root.cancelEdit">Nevermind</a>
-			</div>
+			<br/>
+			<input type="submit" class="btn btn-small btn-primary" data-bind="click: $root.save" value="Post" />
+			<a href="#" class="btn btn-small" data-bind="click: $root.cancelEdit">Nevermind</a>
 		</form>
 	</div>
 	<div class="row">
-		<div class="span1">
-			<a href="#" class="btn btn-mini" data-bind="click: $root.create, visible: !$root.newMode()">New</a>
+		<div class="span2">
+			<a href="#" class="btn btn-mini" data-bind="click: $root.create, visible: !$root.newMode()">New Status</a>
 		</div>
 	</div>
 
