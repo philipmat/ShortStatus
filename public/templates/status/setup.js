@@ -64,6 +64,11 @@ var userStatus = {
 			return d;
 		}, 
 
+		//sparkBars: ko.observable( '▁▁▃▂▇ ▁▃▂▇▁▁▃▂▇▁▁▃▂▇'),
+		sparkBars: ko.observable( spark(_([1,2,3,4,5,6,7,1,2,3,4,5,6,7]).map(function(x) { return Math.random() * 5; }))),
+		//sparkBars2: ko.observable('▇▃▂▇▂▇▁▂▇▃▂▇▇▇▃▂▇▇▁▃'),
+		sparkBars2: ko.observable( spark(_([1,2,3,4,5,6,7,1,2,3,4,5,6,7]).map(function(x) { return Math.random() * 5; }))),
+
 		makeCurrent: function(nextStatus) {
 			var status = ko.toJS(nextStatus);
 			_(['since', 'shortDate', 'prepUrl']).each(function(prop) {

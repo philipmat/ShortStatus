@@ -1,2 +1,12 @@
-.member-status-since { }
+.member-status-since { color: #DDD; }
 form .form-actions { padding-left:0; }
+a i.icon-map-marker { opacity:0.4 }
+a:hover i.icon-map-marker { opacity:1 }
+.sparkline-group { font: Menlo; font-size: 18px; }
+.inverse.inner { color: white; background-color: darkgrey; }
+.sparkline-group .sparkline.inverse {
+	z-index: 100;
+	margin-top: 0px;
+	height: 18px;
+	overflow: hidden;
+}

@@ -10,9 +10,22 @@
 				<blockquote class="member-status callout border-callout">
 					<span class="member-status-text" data-bind="text: description"></span>
 					<small class="member-status-since">
-						(For <abbr data-bind="text: since, attr : { title : started_on }"></abbr>.)
+						(for <abbr data-bind="text: since, attr : { title : started_on }"></abbr>.)
 					</small>
 				</blockquote>
+			</div>
+
+			<div class="span4 offset1">
+				<!--
+				<ul class="unstyled sparkline-group">
+					<li><span class="sparkline" data-bind="text: $root.sparkBars"></span></li>
+					<li><span class="sparkline inverse" data-bind="text: $root.sparkBars"></span></li>
+				</ul>
+				-->
+				<div class="sparkline-group">
+					<div class="sparkline" title="Done tasks over the past two weeks."><span data-bind="text: $root.sparkBars"></div>
+					<div class="sparkline inverse" title="New tasks over the past two weeks."><span class="inverse inner" data-bind="text: $root.sparkBars2"></span></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -47,7 +60,7 @@
 			<ul data-bind="foreach: nextStatuses">
 				<li>
 				<span class="member-status-text" data-bind="text: description"></span>
-				<a href="#" title="Make this the current status" data-bind="click : $root.makeCurrent"> <i class="icon-forward"></i></a>
+				<a href="#" title="Make this the current status" data-bind="click : $root.makeCurrent"> <i class="icon-map-marker"></i></a>
 				</li>
 			</ul>
 		</div>
@@ -57,7 +70,7 @@
 				<li>
 				<span class="member-status-text" data-bind="text: description"></span>
 				<small class="member-status-since">
-					(For <abbr data-bind="text: since, attr : { title : done_on}"></abbr> 
+					(for <abbr data-bind="text: since, attr : { title : done_on}"></abbr> 
 					starting on 
 					<abbr data-bind="text: shortDate, attr : { title : started_on }"></abbr>)</small>
 				</li>
