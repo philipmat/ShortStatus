@@ -19,6 +19,14 @@ var userStatus = {
 				return dateL == dateR ? 0 : (dateL < dateR ? -1 : 1);
 			}
 		},
+		getStatusType: function(data) {
+			return data.done_on 
+					? 'done' 
+					: data.started_on 
+						? 'current'
+						: 'next';
+
+		},
 
 		makeStatus: function(fromJson) {
 			var d = new (function (j) {
@@ -146,6 +154,37 @@ var userStatus = {
 		this.ViewModel.loadFrom(fromJson);
 	}, 
 
+	loadHistory: function(fromJson, originDate) {
+		var stats = { done: {}, next: {} };
+		var now = new Date();
+		now.setDate(now.getDate()+1);now.setHours(0);now.setMinutes(0);now.setSeconds(0);
+		var s = '';
+		for(var date = originDate; date < now; date.setDate(date.getDate() + 1)) {
+			s = date.toISOString().substr(0,10);
+			stats.done[s] = 0;
+			stats.next[s] = 0;
+		}
+		var statFunc = this.ViewModel.getStatusType;
+		_(_.flatten(fromJson))
+			.each(function(status) {
+				if(status.done_on) {
+					s = new Date(Date.parse(status.done_on)).toISOString().substr(0,10);
+					if (stats.done.hasOwnProperty(s))
+						stats.done[s] += 1;
+				} else if (status.started_on) {
+				} else if (status.created_on) {
+					s = new Date(Date.parse(status.created_on)).toISOString().substr(0,10);
+					if (stats.next.hasOwnProperty(s))
+						stats.next[s] += 1;
+				}
+			});
+		console.log(stats, fromJson);
+		var dones = _.values(stats.done), nexts = _.values(stats.next);
+		this.ViewModel.sparkBars(spark(dones));
+		var maxNext = _.max(nexts);
+		this.ViewModel.sparkBars2(spark(_(nexts).map(function(x) { return maxNext - x; })));
+	},
+
 	loadDone: function (fromAllJson) {
 		var vm = this.ViewModel;
 		if (!vm.currentStatus()) vm.newMode(true);
@@ -195,6 +234,17 @@ var userStatus = {
 					final: function(data) { self.loadDone(data); }
 				}
 		);
+
+		var now = new Date();
+		now.setDate(now.getDate() - 14);
+		var historyUri = getURI('text/vnd.borax-data-root', {
+			entity: parts.entity
+			,data_uri: parts.id + '/daterange/' + now.toISOString()
+		});
+		loadJson(historyUri, function(data) {
+			console.log('historyUri=%s', historyUri, data);
+			self.loadHistory(data, now);
+		});
 	},
 
 	setup: function(parts) {

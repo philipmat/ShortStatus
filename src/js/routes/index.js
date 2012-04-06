@@ -10,6 +10,7 @@ var PUB  = path.normalize(__dirname + '/../../../');
 var VIEW_NS = 'shortstatus';
 var VIEW_TEAM = 'teams_and_members';
 var VIEW_STAT = 'status_by_member';
+var DATE_MIN 
 
 function servePublicFile(file, req, res) {
 	var pub = PUB + file;
@@ -97,9 +98,12 @@ exports.configure = function(app) {
 			onDone = callback;
 		}
 
-		var startkey = [status, name, null], endkey = [status, name, {}];
-		options.startkey = options.descending === true ? endkey : startkey;
-		options.endkey = options.descending === true ? startkey : endkey;
+		if (!options.startkey) {
+			// don't overwrite the start key if passed in.
+			var startkey = [status, name, null], endkey = [status, name, {}];
+			options.startkey = options.descending === true ? endkey : startkey;
+			options.endkey = options.descending === true ? startkey : endkey;
+		}
 
 		//console.log('%s status for: %s. params: ', status, name, options);
 		var stat = db.view(VIEW_NS, VIEW_STAT, options, function(x,data) {
@@ -224,8 +228,35 @@ exports.configure = function(app) {
 	app.put('/data/status/:name', function(req, res, next) {});
 
 
-	app.get('/data/status/:name?', function(req, res, next) {
-		console.log('Status for %s.', req.params.name || 'all');
-		res.json({});
+	/*
+	 * :name - is the name of the person for whom to retrieve statuses
+	 * :from - is an ISO formatted date
+	 * :to - is an ISO formatted date (if missing "now" is assumed)
+	 */
+	app.get('/data/status/:name/daterange/:from/:to?', function(req, res, next) {
+		var name = req.params.name
+			,date_from = req.params.from
+			,date_to = req.params.to || (new Date()).toISOString();
+
+		var options_done = {
+			startkey: ['done', name, date_from],
+			endkey: ['done', name, date_to]
+		}, options_next = {
+			startkey: ['next', name, date_from],
+			endkey: ['next', name, date_to]
+		};
+		
+		var results = [];
+		async.forEach([options_done, options_next], function(opt, on_done) {
+				get_status(name, null, opt, function(rows) {
+					console.log(rows);
+					results.push(rows);
+					on_done();
+				})
+			}
+			, function () {
+				res.json(results);
+			}
+		);
 	});
 }
